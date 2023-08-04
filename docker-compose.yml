@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+  mongoc:
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_DATABASE=aeduca
+      - MONGO_INITDB_ROOT_USERNAME=elias
+      - MONGO_INITDB_ROOT_PASSWORD=Keseps
+    volumes:
+      - ./mongodata:/data/db
+    ports:
+      - 27017:27017

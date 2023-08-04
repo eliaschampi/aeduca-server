@@ -1,0 +1,33 @@
+import { Router } from "express";
+import * as lfh from "../handler/LessonFileHandler";
+import * as l from "../handler/LessonHandler";
+import * as rh from "../handler/ResponseHandler";
+
+const router = Router();
+
+//lesson
+router.post("/", l.store);
+router.delete("/:code", l.destroy);
+router.put("/:code/:del_act", l.update);
+router.get("/item/:code", l.fetchByCode);
+router.get("/:unit_code", l.fetchByUnit);
+
+// lesson_file
+router.get("/file/:lesson_code", lfh.fetchLessonFiles);
+router.post("/file", lfh.storeLessonFile);
+router.delete("/file/:code", lfh.removeLessonFile);
+
+//response_handler
+router.get("/regs/:sc", rh.countRegsByLesson);
+router.get("/regs/:lesson_code/:sc/:skip", rh.fetchRegisterByLesson);
+router.get("/regs/:lesson_code/:register_code", rh.fetchByRegister);
+router.put("/regs/:lesson_code/:register_code", rh.toggleReceived);
+router.delete("/regs/:lesson_code/:register_code", l.removeRActivity);
+
+//activity
+router.post("/activity", rh.sendActivity);
+
+//calification
+router.get("/cali/:section_code/:register_code", l.fecthCalificationByRegister);
+
+export default router;
