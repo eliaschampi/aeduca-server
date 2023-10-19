@@ -5,7 +5,7 @@ import * as activity from "./ActivityService";
 import CalificationItem from "../model/CalificationItem";
 
 export function fetchByCode(code: number): QueryBuilder<Lesson, Lesson | undefined> {
-  return Lesson.query().withGraphFetched("[unit, calification, activity]").findById(code);
+  return Lesson.query().withGraphFetched("[calification, activity]").findById(code);
 }
 
 export function fecthCalificationByRegister(
@@ -17,7 +17,6 @@ export function fecthCalificationByRegister(
     .select([
       "l.code",
       "c.name as course",
-      "u.title as unit",
       "l.type",
       "l.title",
       "l.description",
@@ -29,17 +28,16 @@ export function fecthCalificationByRegister(
         .limit(1)
         .as("score")
     ])
-    .join("unit as u", "u.code", "l.unit_code")
     .join("op", "op.code", "u.op_code")
     .join("course as c", "c.code", "op.course_code")
     .whereRaw(`'${section_code}|all' ~* any(sts)`)
     .orderBy("l.created_at", "DESC");
 }
 
-export function fetchByUnit(unit_code: number): QueryBuilder<Lesson, Lesson[]> {
+export function fetchByOp(op_code: number): QueryBuilder<Lesson, Lesson[]> {
   return Lesson.query()
     .withGraphFetched("[calification, activity]")
-    .where("unit_code", unit_code)
+    .where("op_code", op_code)
     .orderBy("created_at", "DESC");
 }
 

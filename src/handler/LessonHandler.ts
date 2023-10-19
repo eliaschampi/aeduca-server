@@ -28,9 +28,9 @@ export const fecthCalificationByRegister = async (
   }
 };
 
-export const fetchByUnit = async (req: Request, res: Response, next: NextFunction) => {
+export const fetchByOp = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const values = await ls.fetchByUnit(+req.params.unit_code);
+    const values = await ls.fetchByOp(+req.params.op_code);
     return res.status(200).send({ values });
   } catch (error) {
     next(error);

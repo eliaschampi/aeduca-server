@@ -10,7 +10,7 @@ router.post("/", l.store);
 router.delete("/:code", l.destroy);
 router.put("/:code/:del_act", l.update);
 router.get("/item/:code", l.fetchByCode);
-router.get("/:unit_code", l.fetchByUnit);
+router.get("/:op_code", l.fetchByOp);
 
 // lesson_file
 router.get("/file/:lesson_code", lfh.fetchLessonFiles);

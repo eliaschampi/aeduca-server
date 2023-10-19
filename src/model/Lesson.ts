@@ -1,12 +1,13 @@
-import Unit from "./Unit";
 import Test from "./Test";
 import Activity from "./Activity";
 import { Model } from "objection";
 import LessonFlies from "./LessonFiles";
 import Calification from "./Calification";
 import CalificationItem from "./CalificationItem";
+import Op from "./Op";
 
 class Lesson extends Model {
+
   static tableName = "lesson";
 
   static get idColumn(): string {
@@ -14,12 +15,12 @@ class Lesson extends Model {
   }
 
   static relationMappings = {
-    unit: {
+    op: {
       relation: Model.BelongsToOneRelation,
-      modelClass: Unit,
+      modelClass: Op,
       join: {
-        from: "lesson.unit_code",
-        to: "unit.code"
+        from: "lesson.op_code",
+        to: "op.code"
       }
     },
 
@@ -72,7 +73,7 @@ class Lesson extends Model {
 
 export type ILesson = {
   code?: number;
-  unit_code: number;
+  op_code: number;
   title: string;
   description: string;
   type: string;
