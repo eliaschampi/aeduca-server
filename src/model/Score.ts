@@ -1,21 +1,22 @@
 import { Model } from "objection";
 
-class CalificationItem extends Model {
+class Score extends Model {
   static get tableName(): string {
-    return "calification_item";
+    return "score";
   }
 
   static get idColumn(): string[] {
-    return ["lesson_code", "register_code"];
+    return ["lesson_code", "register_code", "lesson_type"];
   }
 }
 
-export type ICalificationItem = {
+export type IScore = {
   lesson_code: number;
   register_code: string;
+  lesson_type: string;
   score: string;
   obs?: string;
   keys?: string;
 };
 
-export default CalificationItem;
+export default Score;

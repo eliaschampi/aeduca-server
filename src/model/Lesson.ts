@@ -3,11 +3,10 @@ import Activity from "./Activity";
 import { Model } from "objection";
 import LessonFlies from "./LessonFiles";
 import Calification from "./Calification";
-import CalificationItem from "./CalificationItem";
+import Score from "./Score";
 import Op from "./Op";
 
 class Lesson extends Model {
-
   static tableName = "lesson";
 
   static get idColumn(): string {
@@ -60,12 +59,12 @@ class Lesson extends Model {
       }
     },
 
-    calification_items: {
+    score: {
       relation: Model.HasManyRelation,
-      modelClass: CalificationItem,
+      modelClass: Score,
       join: {
         from: "lesson.code",
-        to: "calification_item.lesson_code"
+        to: "score.lesson_code"
       }
     }
   };
@@ -75,10 +74,8 @@ export type ILesson = {
   code?: number;
   op_code: number;
   title: string;
-  description: string;
-  type: string;
-  state: string;
-  link: string;
+  has: string;
+  lesson_type: string;
   created_at?: string;
   updated_at?: string;
   calification?: any | null;

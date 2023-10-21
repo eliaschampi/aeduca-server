@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as ls from "../services/LessonService";
-import { removeC } from "../services/CalificationItemService";
+import { removeC } from "../services/ScoreService";
 import { removeR } from "../services/ResponseService";
 
 export const fetchByCode = async (req: Request, res: Response, next: NextFunction) => {

@@ -1,7 +1,7 @@
 {
   "name": "myaeducaserver",
   "license": "MIT",
-  "version": "2.99.9",
+  "version": "3.2",
   "scripts": {
     "dev": "ts-node  index.ts",
     "lint": "eslint --ext src/**/*.ts",

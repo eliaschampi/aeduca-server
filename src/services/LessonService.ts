@@ -2,7 +2,7 @@ import { QueryBuilder, PartialModelGraph, ref } from "objection";
 import Lesson, { ILesson } from "../model/Lesson";
 import { update as updateCalification } from "./CalificationService";
 import * as activity from "./ActivityService";
-import CalificationItem from "../model/CalificationItem";
+import Score from "../model/Score";
 
 export function fetchByCode(code: number): QueryBuilder<Lesson, Lesson | undefined> {
   return Lesson.query().withGraphFetched("[calification, activity]").findById(code);
@@ -20,7 +20,7 @@ export function fecthCalificationByRegister(
       "l.type",
       "l.title",
       "l.description",
-      CalificationItem.query()
+      Score.query()
         .alias("ci")
         .select("score")
         .where("ci.lesson_code", ref("l.code"))
@@ -35,10 +35,7 @@ export function fecthCalificationByRegister(
 }
 
 export function fetchByOp(op_code: number): QueryBuilder<Lesson, Lesson[]> {
-  return Lesson.query()
-    .withGraphFetched("[calification, activity]")
-    .where("op_code", op_code)
-    .orderBy("created_at", "DESC");
+  return Lesson.query().where("op_code", op_code).orderBy("created_at", "DESC");
 }
 
 export async function update(lesson: ILesson, code: number, ad: boolean): Promise<void> {

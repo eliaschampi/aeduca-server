@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { ICalificationItem } from "../model/CalificationItem";
-import * as c from "../services/CalificationItemService";
+import { IScore } from "../model/Score";
+import * as c from "../services/ScoreService";
 import { update } from "../services/CalificationService";
 import { fetchByIn } from "../services/RegisterService";
 
@@ -34,7 +34,7 @@ export const calificateBySdf = async (
       sdf.map((s) => s.code),
       req.body.sections
     );
-    let cItems: ICalificationItem[] = [];
+    let cItems: IScore[] = [];
     sdf.forEach((item) => {
       let cheks = 0;
       if (accepteds.some((a) => a.code === item.code)) {
@@ -46,6 +46,7 @@ export const calificateBySdf = async (
           {
             lesson_code,
             register_code: item.code,
+            lesson_type: "calification",
             score: ((20 * cheks) / countQuestion).toFixed(2),
             keys: item.keys
           }
