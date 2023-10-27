@@ -1,5 +1,7 @@
 node_modules
 .vscode
 .env
+.http
+.rest
 package-lock.json
 mongodata

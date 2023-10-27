@@ -1,7 +1,5 @@
 import { QueryBuilder, PartialModelGraph, ref } from "objection";
-import Lesson, { ILesson } from "../model/Lesson";
-import { update as updateCalification } from "./CalificationService";
-import * as activity from "./ActivityService";
+import Lesson from "../model/Lesson";
 import Score from "../model/Score";
 
 export function fetchByCode(code: number): QueryBuilder<Lesson, Lesson | undefined> {
@@ -38,8 +36,8 @@ export function fetchByOp(op_code: number): QueryBuilder<Lesson, Lesson[]> {
   return Lesson.query().where("op_code", op_code).orderBy("created_at", "DESC");
 }
 
-export async function update(lesson: ILesson, code: number, ad: boolean): Promise<void> {
-  await Lesson.query()
+export async function update(lesson: any, code: number, ad: boolean): Promise<void> {
+  /*   await Lesson.query()
     .findById(code)
     .patch({
       ...lesson
@@ -62,10 +60,10 @@ export async function update(lesson: ILesson, code: number, ad: boolean): Promis
         }
       }
     }
-  }
+  } */
 }
 
-export function store(lesson: ILesson): QueryBuilder<Lesson, Lesson> {
+export function store(lesson: object): QueryBuilder<Lesson, Lesson> {
   return Lesson.query()
     .insertGraph(<PartialModelGraph<Lesson>>lesson)
     .returning("code");
