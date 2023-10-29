@@ -39,7 +39,7 @@ export const fetchByOp = async (req: Request, res: Response, next: NextFunction)
 
 export const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await ls.update(req.body, +req.params.code, req.params.del_act === "true");
+    await ls.update(req.body, +req.params.code);
     return res.status(200).send({ message: "Correctamente actualizado" });
   } catch (error) {
     next(error);

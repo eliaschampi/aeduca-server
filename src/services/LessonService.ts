@@ -2,6 +2,8 @@ import { QueryBuilder, PartialModelGraph, ref } from "objection";
 import Lesson from "../model/Lesson";
 import Score from "../model/Score";
 
+type LType = { has: string };
+
 export function fetchByCode(code: number): QueryBuilder<Lesson, Lesson | undefined> {
   return Lesson.query().withGraphFetched("[calification, activity]").findById(code);
 }
@@ -36,31 +38,12 @@ export function fetchByOp(op_code: number): QueryBuilder<Lesson, Lesson[]> {
   return Lesson.query().where("op_code", op_code).orderBy("created_at", "DESC");
 }
 
-export async function update(lesson: any, code: number, ad: boolean): Promise<void> {
-  /*   await Lesson.query()
+export async function update(lesson: LType, code: number): Promise<void> {
+  await Lesson.query()
     .findById(code)
     .patch({
       ...lesson
     });
-  if (lesson.calification) {
-    await updateCalification(code, { keys: lesson.calification.keys });
-  } else {
-    if (ad) {
-      await activity.destroy(code);
-    } else {
-      if (typeof lesson.activity !== "undefined") {
-        if (!lesson.activity.lesson_code) {
-          await activity.create(code, lesson.activity);
-        } else {
-          await activity.update(
-            code,
-            lesson.activity.start_date,
-            lesson.activity.end_activity
-          );
-        }
-      }
-    }
-  } */
 }
 
 export function store(lesson: object): QueryBuilder<Lesson, Lesson> {

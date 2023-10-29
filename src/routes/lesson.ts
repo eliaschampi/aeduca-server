@@ -8,7 +8,7 @@ const router = Router();
 //lesson
 router.post("/", l.store);
 router.delete("/:code", l.destroy);
-router.put("/:code/:del_act", l.update);
+router.put("/:code", l.update);
 router.get("/item/:code", l.fetchByCode);
 router.get("/:op_code", l.fetchByOp);
 

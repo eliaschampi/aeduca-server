@@ -18,6 +18,7 @@ import register from "./register";
 import fileshare from "./fileshare";
 import comment from "./comment";
 import lesson from "./lesson";
+import content from "./content";
 import calification from "./calification";
 import { serveImage, streamVideo } from "../handler/FileHandler";
 
@@ -42,6 +43,7 @@ router.use("/register", verifyToken, register);
 router.use("/fileshare", verifyToken, fileshare);
 router.use("/comment", verifyToken, comment);
 router.use("/lesson", verifyToken, lesson);
+router.use("/content", verifyToken, content);
 router.use("/calification", verifyToken, calification);
 
 export = router;
