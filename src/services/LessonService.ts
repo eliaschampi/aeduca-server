@@ -1,6 +1,7 @@
 import { QueryBuilder, PartialModelGraph, ref } from "objection";
 import Lesson from "../model/Lesson";
 import Score from "../model/Score";
+import { knex } from "../con/KnexConection";
 
 type LType = { has: string };
 
@@ -35,7 +36,19 @@ export function fecthCalificationByRegister(
 }
 
 export function fetchByOp(op_code: number): QueryBuilder<Lesson, Lesson[]> {
-  return Lesson.query().where("op_code", op_code).orderBy("created_at", "DESC");
+  return Lesson.query()
+    .select(
+      "lesson.*",
+      knex.raw(
+        "(select count(lesson_code) c from content where lesson.code = lesson_code)"
+      ),
+      knex.raw(
+        "(select count(lesson_code) a from activity where lesson.code = lesson_code)"
+      ),
+      knex.raw("(select count(lesson_code) t from exam where lesson.code = lesson_code)")
+    )
+    .where("op_code", op_code)
+    .orderBy("created_at", "DESC");
 }
 
 export async function update(lesson: LType, code: number): Promise<void> {
@@ -48,7 +61,7 @@ export async function update(lesson: LType, code: number): Promise<void> {
 
 export function store(lesson: object): QueryBuilder<Lesson, Lesson> {
   return Lesson.query()
-    .insertGraph(<PartialModelGraph<Lesson>>lesson)
+    .insert(<PartialModelGraph<Lesson>>lesson)
     .returning("code");
 }
 
