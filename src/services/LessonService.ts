@@ -2,8 +2,8 @@ import { QueryBuilder, PartialModelGraph, ref } from "objection";
 import Lesson from "../model/Lesson";
 import Score from "../model/Score";
 import { knex } from "../con/KnexConection";
-
-type LType = { has: string };
+import { update as updateCali } from "./CalificationService";
+type LType = { code: number; calification?: object };
 
 export function fetchByCode(code: number): QueryBuilder<Lesson, Lesson | undefined> {
   return Lesson.query().withGraphFetched("[calification, activity]").findById(code);
@@ -57,6 +57,9 @@ export async function update(lesson: LType, code: number): Promise<void> {
     .patch({
       ...lesson
     });
+  if (lesson.calification) {
+    updateCali(lesson.code, lesson.calification);
+  }
 }
 
 export function store(lesson: object): QueryBuilder<Lesson, Lesson> {

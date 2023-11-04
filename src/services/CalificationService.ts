@@ -7,11 +7,11 @@ export function fetchByLesson(lesson_code: number) {
 
 export function update(
   lesson_code: number,
-  cvalues: { keys?: string; uploaded_at?: string | null }
+  data: object
 ): QueryBuilder<Calification, Calification | undefined> {
   return Calification.query()
     .update({
-      ...cvalues
+      ...data
     })
     .findById(lesson_code);
 }
