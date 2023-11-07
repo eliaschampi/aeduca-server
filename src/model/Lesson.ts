@@ -2,6 +2,7 @@ import { Model } from "objection";
 import Score from "./Score";
 import Op from "./Op";
 import Content from "./Content";
+import Calification from "./Calification";
 
 class Lesson extends Model {
   static tableName = "lesson";
@@ -28,7 +29,14 @@ class Lesson extends Model {
         to: "content.lesson_code"
       }
     },
-
+    calification: {
+      relation: Model.HasOneRelation,
+      modelClass: Calification,
+      join: {
+        from: "lesson.code",
+        to: "calification.lesson_code"
+      }
+    },
     score: {
       relation: Model.HasManyRelation,
       modelClass: Score,

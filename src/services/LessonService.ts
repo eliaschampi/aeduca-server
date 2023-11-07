@@ -64,7 +64,7 @@ export async function update(lesson: LType, code: number): Promise<void> {
 
 export function store(lesson: object): QueryBuilder<Lesson, Lesson> {
   return Lesson.query()
-    .insert(<PartialModelGraph<Lesson>>lesson)
+    .insertGraph(<PartialModelGraph<Lesson>>lesson)
     .returning("code");
 }
 
