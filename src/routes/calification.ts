@@ -3,7 +3,6 @@ import * as ci from "../handler/CalificationHandler";
 
 const router = Router();
 
-router.get("/:lesson_code", ci.fetchByLesson);
 router.put("/item", ci.createOrUpdateItem);
 router.put("/sdf", ci.calificateBySdf);
 router.delete("/:lesson_code", ci.removeAll);

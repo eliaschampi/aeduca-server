@@ -1,17 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { IScore } from "../model/Score";
 import * as c from "../services/ScoreService";
-import { update, fetchByLesson as fbl } from "../services/CalificationService";
+import { update } from "../services/CalificationService";
 import { fetchByIn } from "../services/RegisterService";
-
-export const fetchByLesson = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const value = await fbl(+req.params._lesson_code);
-    return res.status(200).send({ value });
-  } catch (error) {
-    next(error);
-  }
-};
 
 export const createOrUpdateItem = async (
   req: Request,

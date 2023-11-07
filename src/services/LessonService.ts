@@ -5,8 +5,11 @@ import { knex } from "../con/KnexConection";
 import { update as updateCali } from "./CalificationService";
 type LType = { code: number; calification?: object };
 
-export function fetchByCode(code: number): QueryBuilder<Lesson, Lesson | undefined> {
-  return Lesson.query().withGraphFetched("[calification, activity]").findById(code);
+export function fetchByCode(
+  code: number,
+  graph: string
+): QueryBuilder<Lesson, Lesson | undefined> {
+  return Lesson.query().withGraphFetched(`[${graph}]`).findById(code);
 }
 
 export function fecthCalificationByRegister(

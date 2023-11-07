@@ -5,7 +5,7 @@ import { removeR } from "../services/ResponseService";
 
 export const fetchByCode = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const value = await ls.fetchByCode(+req.params.code);
+    const value = await ls.fetchByCode(+req.params.code, req.params.graph);
     return res.status(200).send({ value });
   } catch (error) {
     next(error);
