@@ -1,19 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as rh from "../services/ResponseService";
 
-export const countRegsByLesson = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const value = await rh.countRegsByLesson(req.params.sc);
-    return res.status(200).send({ value });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const fetchRegisterByLesson = async (
   req: Request,
   res: Response,

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { bySection } from "../services/RegisterService";
+import { bySection, countBySection } from "../services/RegisterService";
 
 export const fetchBySection = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -11,6 +11,15 @@ export const fetchBySection = async (req: Request, res: Response, next: NextFunc
       online: false
     }));
     return res.status(200).send({ values });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchCount = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const value = await countBySection(req.params.section_code);
+    return res.status(200).send({ value });
   } catch (error) {
     next(error);
   }

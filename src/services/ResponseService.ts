@@ -1,21 +1,7 @@
-import { QueryBuilder, raw, ref } from "objection";
+import { QueryBuilder } from "objection";
 import Person from "../model/Person";
-import Register from "../model/Register";
 import Response, { IResponse } from "../model/Response";
 import { removeByRegisterAndSesion, storeMany } from "./LessonFileService";
-
-export function countRegsByLesson(
-  sc: string
-): QueryBuilder<Register, Register | undefined> {
-  return Register.query()
-    .where(
-      "section_code",
-      "like",
-      sc.length === 10 ? sc : `${new Date().getFullYear().toString() + sc}%`
-    )
-    .count()
-    .first();
-}
 
 export function regsByLesson(
   lesson_code: number,
@@ -30,29 +16,17 @@ export function regsByLesson(
       "profile.image",
       "register.code",
       "register.section_code",
-      raw(
-        "json_build_object('score', calification_item.score, 'keys', calification_item.keys)"
-      ).as("cali"),
-      Response.query()
-        .where("response.register_code", ref("register.code"))
-        .where("response.lesson_code", lesson_code)
-        .count()
-        .as("activity")
+      "response.*"
     ])
     .join("register", "person.dni", "register.student_dni")
     .join("profile", "person.dni", "profile.person_dni")
-    .leftJoin("calification_item", function () {
-      this.on("calification_item.register_code", "register.code").andOnVal(
-        "calification_item.lesson_code",
+    .join("response", function () {
+      this.on("response.register_code", "register.code").andOnVal(
+        "response.lesson_code",
         lesson_code
       );
     })
-    .where(
-      "register.section_code",
-      "like",
-      sc.length === 10 ? sc : `${new Date().getFullYear().toString() + sc}%`
-    )
-    .orderByRaw("calification_item.score DESC NULLS LAST")
+    .where("register.section_code", "like", sc)
     .offset(skip)
     .limit(15);
 }

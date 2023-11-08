@@ -35,3 +35,9 @@ export function bySection(section_code: string): QueryBuilder<Register, Register
     })
     .where("section_code", section_code);
 }
+
+export function countBySection(
+  section_code: string
+): QueryBuilder<Register, Register | undefined> {
+  return Register.query().where("section_code", "like", section_code).count().first();
+}

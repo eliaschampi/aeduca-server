@@ -20,6 +20,7 @@ import comment from "./comment";
 import lesson from "./lesson";
 import content from "./content";
 import calification from "./calification";
+import score from "./score";
 import { serveImage, streamVideo } from "../handler/FileHandler";
 
 const router = Router();
@@ -45,5 +46,6 @@ router.use("/comment", verifyToken, comment);
 router.use("/lesson", verifyToken, lesson);
 router.use("/content", verifyToken, content);
 router.use("/calification", verifyToken, calification);
+router.use("/score", verifyToken, score);
 
 export = router;
