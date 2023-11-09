@@ -4,10 +4,10 @@ import Calification from "../model/Calification";
 export function update(
   lesson_code: number,
   data: object
-): QueryBuilder<Calification, Calification | undefined> {
+): QueryBuilder<Calification, number> {
   return Calification.query()
-    .update({
+    .findById(lesson_code)
+    .patch({
       ...data
-    })
-    .findById(lesson_code);
+    });
 }

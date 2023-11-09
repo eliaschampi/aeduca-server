@@ -3,7 +3,8 @@ import Lesson from "../model/Lesson";
 import Score from "../model/Score";
 import { knex } from "../con/KnexConection";
 import { update as updateCali } from "./CalificationService";
-type LType = { code: number; calification?: object };
+import { update as updateLesson } from "./ContentService";
+type LType = { code: number; calification?: object; content?: object };
 
 export function fetchByCode(
   code: number,
@@ -61,7 +62,10 @@ export async function update(lesson: LType, code: number): Promise<void> {
       ...lesson
     });
   if (lesson.calification) {
-    updateCali(lesson.code, lesson.calification);
+    await updateCali(lesson.code, lesson.calification);
+  }
+  if (lesson.content) {
+    await updateLesson(lesson.code, lesson.content);
   }
 }
 
