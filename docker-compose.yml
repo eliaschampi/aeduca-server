@@ -1,7 +1,17 @@
-version: "3.7"
+version: "3.9"
 services:
+  npm:
+    container_name: servernpm
+    image: node:current-alpine
+    volumes:
+      - .:/app
+    working_dir: /app
+    entrypoint: ["npm"]
+    ports:
+      - 3000:3000
   mongoc:
     image: mongo:latest
+    container_name: servermongo
     environment:
       - MONGO_INITDB_DATABASE=aeduca
       - MONGO_INITDB_ROOT_USERNAME=elias
