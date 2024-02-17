@@ -9,6 +9,5 @@ export const connect = async (dbName: string = defaultDbname): Promise<MongoClie
   const conn = await client.connect();
 
   db = conn.db(dbName);
-
   return client;
 };

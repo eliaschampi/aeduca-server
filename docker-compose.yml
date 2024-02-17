@@ -1,22 +1,26 @@
-version: "3.9"
+version: '3'
 services:
-  npm:
-    container_name: servernpm
-    image: node:current-alpine
-    volumes:
-      - .:/app
-    working_dir: /app
-    entrypoint: ["npm"]
+  app:
+    build: .
     ports:
-      - 3000:3000
-  mongoc:
-    image: mongo:latest
+      - '3000:3000'
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+  mongodb:
     container_name: servermongo
+    image: mongo:latest
     environment:
       - MONGO_INITDB_DATABASE=aeduca
       - MONGO_INITDB_ROOT_USERNAME=elias
-      - MONGO_INITDB_ROOT_PASSWORD=Keseps
+      - MONGO_INITDB_ROOT_PASSWORD=doky
     volumes:
       - ./mongodata:/data/db
     ports:
-      - 27017:27017
+      - '27017:27017'
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
