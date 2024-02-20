@@ -19,10 +19,16 @@ No te olvides de Borrar la carpeta mongodata
 
 ## Cómo ejecutar el proyecto
 
-### Construye y ejecuta los contenedores:
+### Construye y ejecuta los contenedores 
 
+* *_Importante:_ No te olvides de ejecutar servicio de postgresql antes*
+Recuerda, necesitamos usar el ip local del contenedor de postgres, para obtenerlo ejecutamos:
 ```bash
-docker-compose up
+ip -4 addr show docker0 | grep -Po 'inet \K[\d.]+'
+```
+Luego corremos nuestro contenedor
+```bash
+docker-compose up -d
 ```
 
 Si necesitas ejecutar comandos como npm run lint o npm run prettier en tu contenedor Docker, puedes hacerlo utilizando el comando docker-compose exec: Para npm run lint:
