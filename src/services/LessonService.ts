@@ -24,7 +24,6 @@ export function fecthCalificationByRegister(
       "c.name as course",
       "l.type",
       "l.title",
-      "l.description",
       Score.query()
         .alias("ci")
         .select("score")
@@ -33,7 +32,7 @@ export function fecthCalificationByRegister(
         .limit(1)
         .as("score")
     ])
-    .join("op", "op.code", "u.op_code")
+    .join("op", "op.code", "l.op_code")
     .join("course as c", "c.code", "op.course_code")
     .whereRaw(`'${section_code}|all' ~* any(sts)`)
     .orderBy("l.created_at", "DESC");
