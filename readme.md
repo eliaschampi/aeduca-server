@@ -1,44 +1,80 @@
-# Node Server con MongoDB y PostgreSQL en Docker
+# Aeduca Server
 
-Este proyecto es un servidor Node.js que se conecta a MongoDB y PostgreSQL. Ambos servicios de base de datos se ejecutan en contenedores Docker.
+## Description
 
-## Preparación
+This is a Node.js server that connects to MongoDB and PostgreSQL. Both database services are running in Docker containers.
 
-Antes de comenzar, asegúrate de tener Docker y Docker Compose instalados en tu máquina.
+## Prerequisites
 
-## Comandos útiles de Docker
+You need to have the following installed:
 
-Para eliminar todos los contenedores, imágenes, volúmenes y redes no utilizados:
+- Docker
+- Docker Compose
+- Aeduca Admin
+
+## Setup
+
+1. Clone the repository:
 
 ```bash
-docker rm -f "lista"
-docker rmi las imagenes server-app y mongo
+git clone git@github.com:aeduca/server.git
 ```
 
-No te olvides de Borrar la carpeta mongodata
+2. Navigate to the project directory:
+`cd server`
 
-## Cómo ejecutar el proyecto
+### _*Important:*_
+The Docker container name is `serverunning`. Do not create other containers with the same name.
 
-### Construye y ejecuta los contenedores 
+* _Before building the Docker image, make sure to run the PostgreSQL service first. We need to use the local IP of the PostgreSQL container. To obtain it, execute:_
 
-* *_Importante:_ No te olvides de ejecutar servicio de postgresql antes*
-Recuerda, necesitamos usar el ip local del contenedor de postgres, para obtenerlo ejecutamos:
 ```bash
 ip -4 addr show docker0 | grep -Po 'inet \K[\d.]+'
 ```
-Luego corremos nuestro contenedor
+* _do not forget change ip value in knexfile and the credentials_
+
+### _*Important 2:*_
+fill the *`.env`* file with our credentials, look, the resources path is relative, so change it according with our 
+*Aeduca Admin* path, then change your email credentials.
+
+
+## Building the Docker Image
+
+Build the Docker image using Docker Compose:
+
+```bash
+docker-compose build -t aulaserver .
+```
+
+## Running the Application
+Start the application with Docker Compose:
+
 ```bash
 docker-compose up -d
 ```
 
-Si necesitas ejecutar comandos como npm run lint o npm run prettier en tu contenedor Docker, puedes hacerlo utilizando el comando docker-compose exec: Para npm run lint:
+* _The server will be running at http://localhost:3000._
 
+##  Running Commands Inside the Container
+You can execute commands such as npm run lint or npm run dev inside the Docker container using the docker exec command:
 ```bash
-docker-compose exec app npm run lint
+docker exec serverunning npm run lint
+docker exec serverunning npm run prettier
 ```
 
-Para npm run prettier:
-
+Useful Docker Commands
+1. to build code changes
 ```bash
-docker-compose exec app npm run prettier
+docker compose restart app
 ```
+2. to destroy my containers
+```bash
+docker compose down
+```
+3. Note. the image is aulaserver
+```bash
+docker rmi aulaserver
+```
+#### Do not forget to delete the `mongodata` directory if you want to start with a fresh database.
+Thanks
+
