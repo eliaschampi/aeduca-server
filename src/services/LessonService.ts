@@ -51,7 +51,7 @@ export function fetchByOp(op_code: number): QueryBuilder<Lesson, Lesson[]> {
       knex.raw("(select count(lesson_code) t from exam where lesson.code = lesson_code)")
     )
     .where("op_code", op_code)
-    .orderBy("created_at", "DESC");
+    .orderBy("created_at", "ASC");
 }
 
 export async function update(lesson: LType, code: number): Promise<void> {
