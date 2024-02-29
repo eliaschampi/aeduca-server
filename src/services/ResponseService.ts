@@ -1,35 +1,6 @@
 import { QueryBuilder } from "objection";
-import Person from "../model/Person";
 import Response, { IResponse } from "../model/Response";
 import { removeByRegisterAndSesion, storeMany } from "./LessonFileService";
-
-export function regsByLesson(
-  lesson_code: number,
-  sc: string,
-  skip: number
-): QueryBuilder<Person, Person[]> {
-  return Person.query()
-    .select([
-      "person.dni",
-      "person.name",
-      "person.lastname",
-      "profile.image",
-      "register.code",
-      "register.section_code",
-      "response.*"
-    ])
-    .join("register", "person.dni", "register.student_dni")
-    .join("profile", "person.dni", "profile.person_dni")
-    .join("response", function () {
-      this.on("response.register_code", "register.code").andOnVal(
-        "response.lesson_code",
-        lesson_code
-      );
-    })
-    .where("register.section_code", "like", sc)
-    .offset(skip)
-    .limit(15);
-}
 
 export function fetchByRegister(
   lesson_code: number,

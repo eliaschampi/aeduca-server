@@ -46,7 +46,6 @@ export const calificateBySdf = async (
           {
             lesson_code,
             register_code: item.code,
-            lesson_type: "calification",
             score: ((20 * cheks) / countQuestion).toFixed(2),
             keys: item.keys
           }

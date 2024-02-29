@@ -9,6 +9,30 @@ export const fetchByIn = (codes: string[], section_code: string[]) => {
     .whereIn("section_code", section_code);
 };
 
+export const fetchScoreReport = (
+  lesson_code: number,
+  section_code: string,
+  skip: number
+) => {
+  return Register.query()
+    .select(
+      "person.dni",
+      "person.name",
+      "person.lastname",
+      "profile.image",
+      "register.code",
+      "register.section_code",
+      "score.score"
+    )
+    .leftJoin("score", "register.code", "score.register_code")
+    .join("person", "register.student_dni", "person.dni")
+    .join("profile", "person.dni", "profile.person_dni")
+    .where("score.lesson_code", lesson_code)
+    .where("register.section_code", "like", section_code)
+    .offset(skip)
+    .limit(15);
+};
+
 export const fetchActiveRegister = async (dni: string): Promise<Register | null> => {
   const value: any = (
     await Register.query().where("student_dni", dni).where("state", "a")

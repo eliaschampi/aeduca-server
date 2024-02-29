@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { bySection, countBySection } from "../services/RegisterService";
+import * as service from "../services/RegisterService";
 
 export const fetchBySection = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { section_code } = req.params;
-    const registers = await bySection(section_code);
+    const registers = await service.bySection(section_code);
     const values = registers.map((item: any) => ({
       ...item,
       profile: item.profile || {},
@@ -18,8 +18,25 @@ export const fetchBySection = async (req: Request, res: Response, next: NextFunc
 
 export const fetchCount = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const value = await countBySection(req.params.section_code);
+    const value = await service.countBySection(req.params.section_code);
     return res.status(200).send({ value });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchScoreReport = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const values = await service.fetchScoreReport(
+      +req.params.lesson_code,
+      req.params.section_code,
+      +req.params.skip
+    );
+    return res.status(200).send({ values });
   } catch (error) {
     next(error);
   }

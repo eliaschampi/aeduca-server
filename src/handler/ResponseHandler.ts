@@ -1,21 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as rh from "../services/ResponseService";
 
-export const fetchRegisterByLesson = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const lesson_code = parseInt(req.params.lesson_code);
-    const skip = parseInt(req.params.skip);
-    const values = await rh.regsByLesson(lesson_code, req.params.sc, skip);
-    return res.status(200).send({ values });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const fetchByRegister = async (
   req: Request,
   res: Response,
