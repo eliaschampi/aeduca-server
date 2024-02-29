@@ -24,7 +24,4 @@ router.put("/regs/:lesson_code/:register_code", rh.toggleReceived);
 //activity
 router.post("/activity", rh.sendActivity);
 
-//calification
-router.get("/cali/:section_code/:register_code", l.fecthCalificationByRegister);
-
 export default router;

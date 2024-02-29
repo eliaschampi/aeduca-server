@@ -35,6 +35,7 @@ export const fetchScoreReport = (
     .join("person", "register.student_dni", "person.dni")
     .join("profile", "person.dni", "profile.person_dni")
     .where("register.section_code", section_code)
+    .orderByRaw("score.score DESC NULLS LAST")
     .offset(skip)
     .limit(15);
 };

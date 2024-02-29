@@ -4,6 +4,6 @@ import * as ci from "../handler/CalificationHandler";
 const router = Router();
 
 router.put("/sdf", ci.calificateBySdf);
-router.delete("/:lesson_code", ci.removeAll);
+router.get("/:section_code/:register_code", ci.fetchByRegister);
 
 export default router;

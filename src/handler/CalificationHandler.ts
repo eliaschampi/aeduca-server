@@ -1,8 +1,22 @@
 import { NextFunction, Request, Response } from "express";
 import { IScore } from "../model/Score";
-import * as c from "../services/ScoreService";
-import { update } from "../services/CalificationService";
+import { updateOrCreate } from "../services/ScoreService";
+import * as service from "../services/CalificationService";
 import { fetchByIn } from "../services/RegisterService";
+
+export const fetchByRegister = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { section_code, register_code } = req.params;
+    const values = await service.fetchByRegister(section_code, register_code);
+    return res.status(200).send({ values });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const calificateBySdf = async (
   req: Request,
@@ -40,22 +54,12 @@ export const calificateBySdf = async (
       }
     });
     if (cItems.length > 0) {
-      await c.updateOrCreate(cItems);
-      await update(lesson_code, { uploaded_at: new Date().toJSON() });
+      await updateOrCreate(cItems);
+      await service.update(lesson_code, { uploaded_at: new Date().toJSON() });
     }
     return res
       .status(200)
       .send({ message: `Se calificaron ${cItems.length} estudiantes` });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const removeAll = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await update(+req.params.lesson_code, { uploaded_at: null });
-    await c.removeAll(+req.params.lesson_code);
-    return res.status(200).send({ message: "Correctamente eliminado" });
   } catch (error) {
     next(error);
   }

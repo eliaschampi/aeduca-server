@@ -10,22 +10,6 @@ export const updateOrCreate = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const fetchBySection = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { lesson_code, section_code, type, skip } = req.params;
-    const values = await service.fetchByLessonWithReg(
-      +lesson_code,
-      section_code,
-      type,
-      +skip
-    );
-    return res.status(200).send({ values });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// remove Score
 export const removeScore = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { lesson_code, register_code } = req.params;
