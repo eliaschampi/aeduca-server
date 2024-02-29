@@ -1,6 +1,7 @@
 import { Model } from "objection";
 import Person from "./Person";
 import Profile from "./Profile";
+import Score from "./Score";
 
 class Register extends Model {
   static tableName = "register";
@@ -24,6 +25,14 @@ class Register extends Model {
       join: {
         from: "register.student_dni",
         to: "profile.person_dni"
+      }
+    },
+    score: {
+      relation: Model.HasManyRelation,
+      modelClass: Score,
+      join: {
+        from: "register.code",
+        to: "score.register_code"
       }
     }
   };
