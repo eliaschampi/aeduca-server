@@ -20,7 +20,6 @@ router.delete("/file/:code", lfh.removeLessonFile);
 //response_handler
 router.get("/regs/:lesson_code/:register_code", rh.fetchByRegister);
 router.put("/regs/:lesson_code/:register_code", rh.toggleReceived);
-router.delete("/regs/:lesson_code/:register_code", l.removeRActivity);
 
 //activity
 router.post("/activity", rh.sendActivity);

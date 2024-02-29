@@ -1,5 +1,5 @@
 import Register from "../model/Register";
-import { QueryBuilder } from "objection";
+import { QueryBuilder, raw } from "objection";
 import { full } from "../decorators/Decorators";
 
 export const fetchByIn = (codes: string[], section_code: string[]) => {
@@ -22,13 +22,19 @@ export const fetchScoreReport = (
       "profile.image",
       "register.code",
       "register.section_code",
-      "score.score"
+      raw(
+        "json_build_object('score', score.score, 'obs', score.obs, 'keys', score.keys)"
+      ).as("score")
     )
-    .leftJoin("score", "register.code", "score.register_code")
+    .leftJoin("score", function () {
+      this.on("register.code", "score.register_code").andOnVal(
+        "score.lesson_code",
+        lesson_code
+      );
+    })
     .join("person", "register.student_dni", "person.dni")
     .join("profile", "person.dni", "profile.person_dni")
-    .where("score.lesson_code", lesson_code)
-    .where("register.section_code", "like", section_code)
+    .where("register.section_code", section_code)
     .offset(skip)
     .limit(15);
 };
@@ -44,7 +50,7 @@ export const fetchActiveRegister = async (dni: string): Promise<Register | null>
   return null;
 };
 
-export function bySection(section_code: string): QueryBuilder<Register, Register[]> {
+export function fetchBySection(section_code: string): QueryBuilder<Register, Register[]> {
   return Register.query()
     .select("code", "student_dni as dni", "person.name", "person.lastname")
     .joinRelated("person(onlyPerson)")

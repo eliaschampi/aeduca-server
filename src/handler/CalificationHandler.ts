@@ -4,19 +4,6 @@ import * as c from "../services/ScoreService";
 import { update } from "../services/CalificationService";
 import { fetchByIn } from "../services/RegisterService";
 
-export const createOrUpdateItem = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const value = await c.updateOrCreate(req.body);
-    return res.status(200).send({ message: "Correctamente actualizado", value });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const calificateBySdf = async (
   req: Request,
   res: Response,

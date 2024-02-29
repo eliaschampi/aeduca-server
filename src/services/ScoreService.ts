@@ -33,15 +33,15 @@ export const fetchByLessonWithReg = (
     .limit(15);
 };
 
-export function updateOrCreate(caliData: IScore | IScore[]): QueryBuilder<Score, Score> {
+export function updateOrCreate(scoreData: IScore | IScore[]): QueryBuilder<Score, Score> {
   return Score.query()
-    .insert(caliData)
+    .insert(scoreData)
     .onConflict(["lesson_code", "register_code"])
     .merge()
     .returning("*");
 }
 
-export function removeC(
+export function removeScore(
   lesson_code: number,
   register_code: string
 ): QueryBuilder<Score, number> {

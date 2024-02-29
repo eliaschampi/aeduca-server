@@ -1,7 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import * as ls from "../services/LessonService";
-import { removeC } from "../services/ScoreService";
-import { removeR } from "../services/ResponseService";
 
 export const fetchByCode = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -58,21 +56,6 @@ export const store = async (req: Request, res: Response, next: NextFunction) => 
 export const destroy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     await ls.destroy(+req.params.code);
-    return res.status(200).send({ message: "Correctamente eliminado" });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const removeRActivity = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { lesson_code, register_code } = req.params;
-    await removeC(+lesson_code, register_code);
-    await removeR(+lesson_code, register_code);
     return res.status(200).send({ message: "Correctamente eliminado" });
   } catch (error) {
     next(error);

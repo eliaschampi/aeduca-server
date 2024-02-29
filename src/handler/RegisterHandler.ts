@@ -4,7 +4,7 @@ import * as service from "../services/RegisterService";
 export const fetchBySection = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { section_code } = req.params;
-    const registers = await service.bySection(section_code);
+    const registers = await service.fetchBySection(section_code);
     const values = registers.map((item: any) => ({
       ...item,
       profile: item.profile || {},
@@ -16,7 +16,7 @@ export const fetchBySection = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const fetchCount = async (req: Request, res: Response, next: NextFunction) => {
+export const countBySection = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const value = await service.countBySection(req.params.section_code);
     return res.status(200).send({ value });
