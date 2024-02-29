@@ -29,6 +29,16 @@ import {
 } from "../services/FileService";
 import { FileEntity, mimeTypes } from "../model/File";
 
+export const fetchByCode = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { code } = req.params;
+    const value = await byCode(parseInt(code));
+    return res.status(200).send({ value });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const search = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { dni, query } = req.params;

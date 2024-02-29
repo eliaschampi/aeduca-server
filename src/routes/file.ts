@@ -12,11 +12,13 @@ import {
   fetchSumSize,
   search,
   storeFile,
-  update
+  update,
+  fetchByCode
 } from "../handler/FileHandler";
 
 const router = Router();
 
+router.get("/file/:code", fetchByCode);
 router.get("/file/:dni/:query", search);
 router.get("/all_files/:dni/:parent_code/:onlydir?", fetchByUser);
 router.get("/rh_files/:dni/:mode", fetchRecentOrHeavy);

@@ -61,10 +61,10 @@ export async function update(lesson: LType, code: number): Promise<void> {
       ...lesson
     });
   if (lesson.calification) {
-    await updateCali(lesson.code, lesson.calification);
+    await updateCali(code, lesson.calification);
   }
   if (lesson.content) {
-    await updateLesson(lesson.code, lesson.content);
+    await updateLesson(code, lesson.content);
   }
 }
 
