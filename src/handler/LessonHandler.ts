@@ -12,7 +12,7 @@ export const fetchByCode = async (req: Request, res: Response, next: NextFunctio
 
 export const fetchByOp = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const values = await ls.fetchByOp(+req.params.op_code);
+    const values = await ls.fetchByOp(+req.params.op_code, req.params.user as "teacher" | "student"); 
     return res.status(200).send({ values });
   } catch (error) {
     next(error);
