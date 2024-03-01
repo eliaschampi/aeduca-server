@@ -17,10 +17,10 @@ const CSP = () => {
         "'unsafe-eval'"
       ],
       "font-src": ["'self'", "https://fonts.gstatic.com"],
-      "connect-src": [ws_origin, "*.plyr.io", "ws:", "data:"],
-      "img-src": [cli_origin, ws_origin, "blob:", "data:", "https:"],
-      "object-src": [cli_origin, ws_origin, "blob:"],
-      "media-src": [cli_origin, ws_origin, "blob:", "data:"],
+      "connect-src": [ws_origin, "https://carrioneduca.edu.pe", "*.plyr.io", "ws:", "data:"],
+      "img-src": [cli_origin, ws_origin, "https://docs.google.com", "blob:", "data:", "https:"],
+      "object-src": [cli_origin, ws_origin, "https://docs.google.com", "blob:"],
+      "media-src": [cli_origin, ws_origin, "https://docs.google.com", "blob:", "data:"],
       "frame-src": ["'self'", "https://www.google.com", "https://www.youtube.com"]
     }
   });
