@@ -2,7 +2,14 @@ import { QueryBuilder, PartialModelGraph } from "objection";
 import Lesson from "../model/Lesson";
 import { update as updateCali } from "./CalificationService";
 import { update as updateLesson } from "./ContentService";
-type LType = { code: number; calification?: object; content?: object };
+import { update as updateActivity } from "./ActivityService";
+import { IActivity } from "../model/Activity";
+type LType = {
+  code: number;
+  calification?: object;
+  content?: object;
+  activity?: IActivity;
+};
 
 export function fetchByCode(
   code: number,
@@ -11,18 +18,18 @@ export function fetchByCode(
   return Lesson.query().withGraphFetched(`[${graph}]`).findById(code);
 }
 
-export function fetchByOp(op_code: number, user: "teacher" | "student"): QueryBuilder<Lesson, Lesson[]> {
-  let query = Lesson.query()
-    .where("op_code", op_code)
-    .orderBy("created_at", "ASC");
+export function fetchByOp(
+  op_code: number,
+  user: "docente" | "estudiante"
+): QueryBuilder<Lesson, Lesson[]> {
+  let query = Lesson.query().where("op_code", op_code).orderBy("created_at", "ASC");
 
-  if (user !== "teacher") {
+  if (user === "estudiante") {
     query = query.where("visible", true);
   }
 
   return query;
 }
-
 
 export async function update(lesson: LType, code: number): Promise<void> {
   await Lesson.query()
@@ -32,9 +39,14 @@ export async function update(lesson: LType, code: number): Promise<void> {
     });
   if (lesson.calification) {
     await updateCali(code, lesson.calification);
+    return;
   }
   if (lesson.content) {
     await updateLesson(code, lesson.content);
+    return;
+  }
+  if (lesson.activity) {
+    await updateActivity(code, lesson.activity);
   }
 }
 

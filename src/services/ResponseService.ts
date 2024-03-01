@@ -1,35 +1,45 @@
 import { QueryBuilder } from "objection";
 import Response, { IResponse } from "../model/Response";
-import { removeByRegisterAndSesion, storeMany } from "./LessonFileService";
+
+export function fetchByLessonAndSection(
+  lesson_code: number,
+  section_code: string
+): QueryBuilder<Response, Response[]> {
+  return Response.query()
+    .select([
+      "person.dni",
+      "person.name",
+      "person.lastname",
+      "profile.image",
+      "register.code",
+      "register.section_code",
+      "response.files"
+    ])
+    .join("register", "response.register_code", "register.code")
+    .join("person", "register.student_dni", "person.dni")
+    .join("profile", "person.dni", "profile.person_dni")
+    .where("response.lesson_code", lesson_code)
+    .andWhere("register.section_code", section_code)
+    .orderBy("response.created_at", "desc");
+}
 
 export function fetchByRegister(
   lesson_code: number,
   register_code: string
 ): QueryBuilder<Response, Response | undefined> {
-  return Response.query().withGraphFetched("files.[file]").findOne({
+  return Response.query().findOne({
     lesson_code,
     register_code
   });
 }
 
 export async function sendActivity(registerData: IResponse): Promise<Response> {
-  await storeMany(registerData.files);
   return await Response.query().insert({
     lesson_code: registerData.lesson_code,
     register_code: registerData.register_code,
-    response_message: registerData.response_message
+    response_message: registerData.response_message,
+    files: registerData.files
   });
-}
-
-export async function removeR(
-  lesson_code: number,
-  register_code: string
-): Promise<number> {
-  await removeByRegisterAndSesion(lesson_code, register_code);
-  return await Response.query()
-    .where("lesson_code", lesson_code)
-    .where("register_code", register_code)
-    .delete();
 }
 
 export function toggleReceived(

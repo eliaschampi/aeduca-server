@@ -8,6 +8,10 @@ export const byCode = async (code: number): Promise<File | undefined> => {
   return await File.query().findById(code);
 };
 
+export const byCodeIn = async (codes: number[]): Promise<File[]> => {
+  return await File.query().whereIn("code", codes);
+};
+
 export const searchQuery = async (dni: string, query: string): Promise<File[]> => {
   return await File.query()
     .where(raw(`dni = '${dni}' and name ilike '%${query}%'`))

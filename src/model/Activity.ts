@@ -26,8 +26,10 @@ class Activity extends Model {
 
 export type IActivity = {
   lesson_code: number;
+  instruction: string;
   start_date: Date;
   end_activity: Date;
+  isfree: boolean;
 };
 
 export default Activity;
