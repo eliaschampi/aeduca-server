@@ -22,7 +22,7 @@ export const fetchByRegister = (section_code: string, register_code: string) => 
         register_code
       );
     })
-    .whereRaw(`'${section_code}|all' ~* any(op.sts)`)
+    .whereRaw(`'${section_code}' ~* any(op.sts)`)
     .orderBy("lesson.created_at", "DESC");
 };
 

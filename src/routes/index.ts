@@ -21,6 +21,7 @@ import lesson from "./lesson";
 import content from "./content";
 import calification from "./calification";
 import response from "./response";
+import activity from "./activity";
 import score from "./score";
 import { serveImage, streamVideo } from "../handler/FileHandler";
 
@@ -48,6 +49,7 @@ router.use("/lesson", verifyToken, lesson);
 router.use("/content", verifyToken, content);
 router.use("/calification", verifyToken, calification);
 router.use("/response", verifyToken, response);
+router.use("/activity", verifyToken, activity);
 router.use("/score", verifyToken, score);
 
 export = router;

@@ -10,14 +10,12 @@ export function fetchByLessonAndSection(
       "person.dni",
       "person.name",
       "person.lastname",
-      "profile.image",
       "register.code",
       "register.section_code",
       "response.files"
     ])
     .join("register", "response.register_code", "register.code")
     .join("person", "register.student_dni", "person.dni")
-    .join("profile", "person.dni", "profile.person_dni")
     .where("response.lesson_code", lesson_code)
     .andWhere("register.section_code", section_code)
     .orderBy("response.created_at", "desc");
