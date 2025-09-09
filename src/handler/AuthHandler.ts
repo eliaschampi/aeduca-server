@@ -18,7 +18,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const person: any = await fetchByDNI(dni);
-
+    console.log(person);
     if (!person || !person.profile) {
       return res
         .status(404)
@@ -26,7 +26,6 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const teacher: any = await fetchActiveTeacher(dni);
-
     if (!teacher) {
       register = await fetchActiveRegister(dni);
       if (!register) {

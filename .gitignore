@@ -5,3 +5,5 @@ node_modules
 .rest
 package-lock.json
 mongodata
+*.rest
+*.http

@@ -1,20 +1,50 @@
-version: '3.9'
+version: "3.9"
+
 services:
   app:
     build: .
     container_name: serverunning
     image: aulaserver
-    volumes:
-      - .:/app
     ports:
-      - '3000:3000'
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - CLIURL=http://localhost:5173   # ajusta al frontend real
+      - API=/api/v1
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=aeduca
+      - DB_USER=elias
+      - DB_PASSWORD=7532
+      - MONGO_URL=mongodb://elias:doky@mongodb:27017/aeduca?authSource=admin
+    volumes:
+      - .:/app              # montar código local (hot reload)
+      - /app/node_modules   # volumen anónimo para deps (no se pisan)
     depends_on:
+      - postgres
       - mongodb
     networks:
       - app-network
+
+  postgres:
+    container_name: serverpostgres
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      - POSTGRES_DB=aeduca
+      - POSTGRES_USER=elias
+      - POSTGRES_PASSWORD=7532
+    volumes:
+      - ./postgresdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+
   mongodb:
     container_name: servermongo
     image: mongo:latest
+    restart: always
     environment:
       - MONGO_INITDB_DATABASE=aeduca
       - MONGO_INITDB_ROOT_USERNAME=elias
@@ -22,9 +52,10 @@ services:
     volumes:
       - ./mongodata:/data/db
     ports:
-      - '27017:27017'
+      - "27017:27017"
     networks:
       - app-network
+
 networks:
   app-network:
     driver: bridge
