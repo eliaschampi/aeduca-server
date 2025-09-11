@@ -91,14 +91,14 @@ export const fetchAttendanceByEntity = async (
   try {
     const { entity_identifier } = req.params;
     const { from, to, priority } = req.query;
-    
+
     const attendances = await fetchByEntity(
       entity_identifier,
       from as string,
       to as string,
       Number(priority)
     );
-    
+
     return res.status(200).json({ data: attendances });
   } catch (error) {
     next(error);
