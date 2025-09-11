@@ -24,7 +24,6 @@ services:
       - app-network
       - main_default
 
-
   mongodb:
     container_name: servermongo
     image: mongo:latest

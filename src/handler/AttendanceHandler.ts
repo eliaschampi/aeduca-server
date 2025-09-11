@@ -4,6 +4,7 @@ import path from "path";
 import {
   entryTime,
   existsToday,
+  fetchByEntity,
   justificate,
   sendPermise,
   store
@@ -77,6 +78,28 @@ export const storeAttendance = async (
     }
     const value = await store(req.body);
     return res.status(200).send({ message: "Correctamente Guardado", value });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchAttendanceByEntity = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { entity_identifier } = req.params;
+    const { from, to, priority } = req.query;
+    
+    const attendances = await fetchByEntity(
+      entity_identifier,
+      from as string,
+      to as string,
+      Number(priority)
+    );
+    
+    return res.status(200).json({ data: attendances });
   } catch (error) {
     next(error);
   }

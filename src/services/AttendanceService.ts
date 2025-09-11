@@ -55,6 +55,22 @@ export async function store(attendance_request: {
   }
 }
 
+export async function fetchByEntity(
+  entity_identifier: string,
+  from: string,
+  to: string,
+  priority: number
+): Promise<any[]> {
+  return await knex
+    .select("attendance.*", "justification.*")
+    .from(ATTENDANCE_TABLE_NAME)
+    .leftJoin("justification", "attendance.code", "justification.attendance_code")
+    .whereBetween("attendance.created_at", [from, to])
+    .where("attendance.priority", priority)
+    .where("attendance.entity_identifier", entity_identifier)
+    .orderBy("attendance.created_at", "desc");
+}
+
 export async function sendPermise(permision_data: {
   description: string;
   branch_code: number;

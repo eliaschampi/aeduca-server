@@ -5,7 +5,7 @@ import helmet from "helmet";
 const urls = {
   admin: "https://carrioneduca.edu.pe",
   aula: "https://aula.carrioneduca.edu.pe",
-  youtube: "https://www.youtube.com",
+  youtube: "https://www.youtube.com"
 };
 
 // Use descriptive variable names
