@@ -22,7 +22,7 @@ services:
       - mongodb
     networks:
       - app-network
-      - main_default
+      - aeduca-main_default
 
   mongodb:
     container_name: servermongo
@@ -42,5 +42,5 @@ services:
 networks:
   app-network:
     driver: bridge
-  main_default:
+  aeduca-main_default:
     external: true

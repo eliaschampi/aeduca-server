@@ -23,6 +23,7 @@ import calification from "./calification";
 import response from "./response";
 import activity from "./activity";
 import score from "./score";
+import payment from "./payment";
 import { serveImage, streamVideo } from "../handler/FileHandler";
 
 const router = Router();
@@ -51,5 +52,6 @@ router.use("/calification", verifyToken, calification);
 router.use("/response", verifyToken, response);
 router.use("/activity", verifyToken, activity);
 router.use("/score", verifyToken, score);
+router.use("/payment", verifyToken, payment);
 
 export = router;
