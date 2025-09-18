@@ -49,7 +49,6 @@ echo ""
 echo "📁 Setting up required directories..."
 mkdir -p ../drive
 mkdir -p ./pgdata
-mkdir -p ./mongodata
 chmod 755 ../drive
 print_status "Drive directory created at ../drive"
 print_status "Database directories prepared"

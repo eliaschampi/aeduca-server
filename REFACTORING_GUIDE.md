@@ -75,7 +75,6 @@ mv package-new.json package.json
 npm install
 
 # Remove MongoDB from node_modules
-npm uninstall mongodb
 ```
 
 ### Step 4: Replace Files
@@ -111,9 +110,6 @@ rm src/routes/room.ts
 ### Step 6: Environment Variables
 Update `.env` file:
 ```env
-# Remove MongoDB URL
-# MONGODB_URL=mongodb://... (REMOVE THIS LINE)
-
 # Ensure STORAGE path exists
 STORAGE=../drive
 ```
@@ -209,7 +205,6 @@ If issues arise:
 1. Restore database: `psql -U user -d aeduca < backup_YYYYMMDD.sql`
 2. Restore files: `tar -xzf drive_backup_YYYYMMDD.tar.gz`
 3. Revert code: `git checkout main`
-4. Reinstall old dependencies: `npm install mongodb@6.3.0`
 
 ## Future Enhancements
 
