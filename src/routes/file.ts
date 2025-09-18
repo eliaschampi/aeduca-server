@@ -4,7 +4,12 @@ import verifyToken from "../middleware/verifyToken";
 
 const router = Router();
 
-// All file routes require authentication
+// Media serving routes (no auth required for direct browser access)
+router.get("/image/:code", FileHandler.serveImage);
+router.get("/stream/:code", FileHandler.streamVideo);
+router.get("/download/:code", FileHandler.downloadFile);
+
+// All other file routes require authentication
 router.use(verifyToken);
 
 // File operations
@@ -28,10 +33,5 @@ router.delete("/trash/:dni", FileHandler.cleanTrash);
 
 // Sharing
 router.get("/shared/:dni/:section_code", FileHandler.fetchShared);
-
-// File serving
-router.get("/download/:code", FileHandler.downloadFile);
-router.get("/stream/:code", FileHandler.streamVideo);
-router.get("/image/:code", FileHandler.serveImage);
 
 export default router;

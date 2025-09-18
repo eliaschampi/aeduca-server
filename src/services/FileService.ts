@@ -101,7 +101,7 @@ const updateParentPath = async (
 };
 
 export const storeWithTransaction = async (
-  file_request: { code: number; name: string; parent_path: string },
+  file_request: { code: number; name: string; parent_path: string | null },
   joinedChildPath: Callvar,
   renameOrMove: Callvar
 ): Promise<boolean> => {
@@ -143,10 +143,7 @@ export const deleteTrash = async (
 ): Promise<boolean> => {
   return await File.transaction(async (tsx) => {
     // Properly reference the "file" table using Objection's query builder with the current transaction
-    await File.query(tsx)
-      .where("dni", dni)
-      .where("parent_path", "/trash/")
-      .delete();
+    await File.query(tsx).where("dni", dni).where("parent_path", "/trash/").delete();
 
     await destroyTrashFiles(dni);
 

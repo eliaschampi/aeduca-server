@@ -36,13 +36,24 @@ class FileCore {
     const { dni, parent_path, name } = entity;
     const userDir = path.join(this.storageRoot, dni);
 
-    if (parent_path && parent_path !== "null" && parent_path !== "/") {
-      // Remove leading/trailing slashes and join
-      const cleanParentPath = parent_path.replace(/^\/|\/$/g, "");
-      return path.join(userDir, cleanParentPath, name);
+    // Handle root directory cases (null, empty, or root indicators)
+    if (
+      !parent_path ||
+      parent_path === "null" ||
+      parent_path === "/" ||
+      parent_path === ""
+    ) {
+      return path.join(userDir, name);
     }
 
-    return path.join(userDir, name);
+    // Handle trash directory
+    if (parent_path === "/trash/") {
+      return path.join(userDir, "trash", name);
+    }
+
+    // Handle other directories - remove leading/trailing slashes
+    const cleanParentPath = parent_path.replace(/^\/|\/$/g, "");
+    return path.join(userDir, cleanParentPath, name);
   }
 
   /**
@@ -163,7 +174,7 @@ class FileCore {
   async renameOrMove(
     entity: FileEntity,
     newName: string,
-    newParentPath?: string
+    newParentPath?: string | null
   ): Promise<{ success: boolean; message: string }> {
     try {
       const oldPath = this.getFullPath(entity);
@@ -183,7 +194,8 @@ class FileCore {
 
       const newPath = this.getFullPath(newEntity);
 
-      if (await this.exists(newPath)) {
+      // Skip existence check if paths are the same (just updating database)
+      if (oldPath !== newPath && (await this.exists(newPath))) {
         return {
           success: false,
           message: "Destination already exists"
@@ -194,8 +206,10 @@ class FileCore {
       const destDir = path.dirname(newPath);
       await fs.mkdir(destDir, { recursive: true });
 
-      // Rename/move the file
-      await fs.rename(oldPath, newPath);
+      // Rename/move the file only if paths are different
+      if (oldPath !== newPath) {
+        await fs.rename(oldPath, newPath);
+      }
 
       return {
         success: true,

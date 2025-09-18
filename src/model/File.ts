@@ -4,7 +4,7 @@ import FileShare from "./FileShare";
 export type FileEntity = {
   dni: string;
   name: string;
-  parent_path?: string;
+  parent_path?: string | null;
   parent_code?: number;
   size?: number;
   type?: "dir" | "doc" | "vid" | "img" | "aud" | "zip" | "otr";
@@ -13,7 +13,7 @@ export type FileEntity = {
 export interface Attached extends FileEntity {
   code: number;
   full_route?: string;
-  parent_path?: string;
+  parent_path?: string | null;
   created_at?: string;
 }
 
@@ -30,7 +30,7 @@ class File extends Model {
   code!: number;
   dni!: string;
   name!: string;
-  parent_path?: string;
+  parent_path?: string | null;
   parent_code?: number;
   size?: number;
   type?: "dir" | "doc" | "vid" | "img" | "aud" | "zip" | "otr";

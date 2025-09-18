@@ -244,11 +244,30 @@ class FileHandler {
         return;
       }
 
+      const currentFile = existingFile as FileEntity;
+
+      // Detect restore operation: when only code is sent (name and parent_path are undefined)
+      const isRestoreOperation = name === undefined && parent_path === undefined;
+      const isFromTrash = currentFile.parent_path === "/trash/";
+
+      let newName: string;
+      let newParentPath: string | null;
+
+      if (isRestoreOperation && isFromTrash) {
+        // Restore from trash to root
+        newName = currentFile.name;
+        newParentPath = null;
+      } else {
+        // Regular rename/move operation
+        newName = name || currentFile.name;
+        newParentPath = parent_path !== undefined ? parent_path : currentFile.parent_path;
+      }
+
       // Prepare for filesystem operation
       const renameResult = await FileCore.renameOrMove(
-        existingFile as FileEntity,
-        name || existingFile.name,
-        parent_path !== undefined ? parent_path : existingFile.parent_path
+        currentFile,
+        newName,
+        newParentPath
       );
 
       if (!renameResult.success) {
@@ -258,9 +277,9 @@ class FileHandler {
 
       // Update in database with transaction (handles child paths for directories)
       const joinedChildPath = (
-        o_parent_path: string,
+        o_parent_path: string | null,
         o_name: string,
-        n_parent_path: string,
+        n_parent_path: string | null,
         n_name: string
       ) => {
         const old_child_path = FileCore.joinParentPath(o_parent_path, o_name);
@@ -269,12 +288,16 @@ class FileHandler {
       };
 
       await storeWithTransaction(
-        req.body,
+        { code, name: newName, parent_path: newParentPath },
         joinedChildPath,
         async () => true // FileCore already handled the rename
       );
 
-      res.status(200).json({ message: "File updated successfully" });
+      const message =
+        isRestoreOperation && isFromTrash
+          ? "File restored successfully"
+          : "File updated successfully";
+      res.status(200).json({ message });
     } catch (error) {
       next(error);
     }
@@ -398,7 +421,7 @@ class FileHandler {
   }
 
   /**
-   * Stream video
+   * Stream media files (video, audio, documents)
    * GET /api/v1/file/stream/:code
    */
   async streamVideo(req: Request, res: Response): Promise<void> {
@@ -419,8 +442,25 @@ class FileHandler {
         return;
       }
 
+      // Set CORS headers
+      this.setCorsHeaders(res);
+
       const stat = fs.statSync(fullPath);
       const fileSize = stat.size;
+      const extension = path.extname(entity.name).toLowerCase().substring(1);
+
+      // Determine content type based on file extension
+      let contentType = mimes[extension as keyof mimeTypes] || "application/octet-stream";
+
+      // Special handling for common media types
+      if (entity.type === "vid") {
+        contentType = "video/mp4";
+      } else if (entity.type === "aud") {
+        contentType = "audio/mpeg";
+      } else if (extension === "pdf") {
+        contentType = "application/pdf";
+      }
+
       const { range } = req.headers;
 
       if (range) {
@@ -438,19 +478,21 @@ class FileHandler {
           "Content-Range": `bytes ${chunkStart}-${chunkEnd}/${fileSize}`,
           "Accept-Ranges": "bytes",
           "Content-Length": chunkSize,
-          "Content-Type": "video/mp4"
+          "Content-Type": contentType
         });
 
         stream.pipe(res);
       } else {
         res.writeHead(200, {
           "Content-Length": fileSize,
-          "Content-Type": "video/mp4"
+          "Content-Type": contentType,
+          "Accept-Ranges": "bytes"
         });
 
         fs.createReadStream(fullPath).pipe(res);
       }
     } catch (error) {
+      console.error("Error streaming media:", error);
       res.sendStatus(404);
     }
   }
@@ -477,19 +519,33 @@ class FileHandler {
         return;
       }
 
+      // Set CORS headers
+      this.setCorsHeaders(res);
+
       const stat = fs.statSync(fullPath);
       const fileSize = stat.size;
       const extension = path.extname(entity.name).toLowerCase().substring(1);
 
       res.writeHead(200, {
         "Content-Length": fileSize,
-        "Content-Type": mimes[extension as keyof mimeTypes] || "application/octet-stream"
+        "Content-Type": mimes[extension as keyof mimeTypes] || "application/octet-stream",
+        "Cache-Control": "public, max-age=3600"
       });
 
       fs.createReadStream(fullPath).pipe(res);
     } catch (error) {
+      console.error("Error serving image:", error);
       res.sendStatus(404);
     }
+  }
+
+  /**
+   * Set CORS headers for media serving
+   */
+  private setCorsHeaders(res: Response): void {
+    const origin = process.env.CLIURL || "*";
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
   }
 
   /**
