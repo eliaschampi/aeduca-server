@@ -11,7 +11,8 @@ class FileCore {
   private storageRoot: string;
 
   constructor() {
-    this.storageRoot = process.env.STORAGE || "../drive";
+    // Default to '/drive' when STORAGE env variable is not provided
+    this.storageRoot = process.env.STORAGE || "/drive";
     this.ensureStorageRoot();
   }
 

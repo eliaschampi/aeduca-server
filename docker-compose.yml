@@ -20,7 +20,7 @@ services:
     volumes:
       - .:/app              # montar código local (hot reload)
       - /app/node_modules   # volumen anónimo para deps (no se pisan)
-      - ./drive:/app/drive  # montar directorio de archivos
+      - ../drive:/drive      # montar directorio de archivos fuera del proyecto
     networks:
       - app-network
       - aeduca-main_default
