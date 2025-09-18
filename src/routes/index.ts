@@ -26,7 +26,7 @@ const router = Router();
 
 // Health check endpoint
 router.get("/health", (req, res) => {
-  res.status(200).json({ 
+  res.status(200).json({
     status: "healthy",
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
@@ -57,7 +57,7 @@ router.use("/section", section);
 
 // 404 handler for unknown API routes
 router.use("*", (req, res) => {
-  res.status(404).json({ 
+  res.status(404).json({
     error: "Not Found",
     message: "The requested API endpoint does not exist",
     path: req.originalUrl

@@ -13,7 +13,14 @@ class CommentHandler {
    */
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { post_code, message, reply_to_code, content_type = "text", url, file_code } = req.body;
+      const {
+        post_code,
+        message,
+        reply_to_code,
+        content_type = "text",
+        url,
+        file_code
+      } = req.body;
       const { dni } = req.user;
 
       // Get commenter details
@@ -61,12 +68,13 @@ class CommentHandler {
     try {
       const { post_code } = req.params;
       const { page = 1, limit = 20, includeReplies = true } = req.query;
-      
+
       const offset = (Number(page) - 1) * Number(limit);
-      
-      const comments = includeReplies === "true" || includeReplies === true
-        ? await CommentService.getPostComments(Number(post_code), Number(limit), offset)
-        : await CommentService.getAllPostComments(Number(post_code));
+
+      const comments =
+        includeReplies === "true" || includeReplies === true
+          ? await CommentService.getPostComments(Number(post_code), Number(limit), offset)
+          : await CommentService.getAllPostComments(Number(post_code));
 
       const count = await CommentService.getCommentCount(Number(post_code));
 
@@ -90,9 +98,9 @@ class CommentHandler {
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
-      
+
       const comment = await CommentService.getById(Number(code));
-      
+
       if (!comment) {
         res.status(404).json({ message: "Comment not found" });
         return;
@@ -112,14 +120,10 @@ class CommentHandler {
     try {
       const { dni } = req.params;
       const { page = 1, limit = 20 } = req.query;
-      
+
       const offset = (Number(page) - 1) * Number(limit);
-      
-      const comments = await CommentService.getUserComments(
-        dni,
-        Number(limit),
-        offset
-      );
+
+      const comments = await CommentService.getUserComments(dni, Number(limit), offset);
 
       res.status(200).json({
         data: comments,
@@ -227,7 +231,10 @@ class CommentHandler {
       };
 
       const reply = file_code
-        ? await CommentService.createWithAttachment({ ...replyData, reply_to_code: Number(code) }, file_code)
+        ? await CommentService.createWithAttachment(
+            { ...replyData, reply_to_code: Number(code) },
+            file_code
+          )
         : await CommentService.replyToComment(Number(code), replyData);
 
       res.status(201).json({
@@ -246,9 +253,9 @@ class CommentHandler {
   async getThread(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
-      
+
       const thread = await CommentService.getCommentThread(Number(code));
-      
+
       if (!thread) {
         res.status(404).json({ message: "Comment not found" });
         return;
@@ -267,7 +274,7 @@ class CommentHandler {
   async getCommentCount(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { post_code } = req.params;
-      
+
       const count = await CommentService.getCommentCount(Number(post_code));
 
       res.status(200).json({ count });

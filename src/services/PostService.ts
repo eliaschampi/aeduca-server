@@ -49,9 +49,7 @@ class PostService {
       .orderBy("post.created_at", "desc");
 
     // Add comment count
-    query = query.select(
-      PostModel.raw("COUNT(DISTINCT comment.code) as comment_count")
-    );
+    query = query.select(PostModel.raw("COUNT(DISTINCT comment.code) as comment_count"));
 
     // Apply filters
     if (filters.approved !== undefined) {
@@ -60,7 +58,7 @@ class PostService {
 
     if (filters.dni) {
       // Get posts visible to this user
-      query = query.where(function() {
+      query = query.where(function () {
         this.where("post.creator_dni", filters.dni!)
           .orWhereRaw("? = ANY(post.share_with)", ["all"])
           .orWhereRaw("? = ANY(post.share_with)", [filters.section_code || ""]);
@@ -83,7 +81,7 @@ class PostService {
         .where("post_code", post.code)
         .orderBy("created_at", "desc")
         .first();
-      
+
       (post as PostWithStats).latest_comment = latestComment;
     }
 
@@ -93,7 +91,12 @@ class PostService {
   /**
    * Get posts for a specific user's feed
    */
-  async getUserFeed(dni: string, section_code: string, limit = 20, offset = 0): Promise<PostWithStats[]> {
+  async getUserFeed(
+    dni: string,
+    section_code: string,
+    limit = 20,
+    offset = 0
+  ): Promise<PostWithStats[]> {
     return await this.getPosts({
       dni,
       section_code,
@@ -142,9 +145,12 @@ class PostService {
   /**
    * Toggle like on a post
    */
-  async toggleLike(postCode: number, dni: string): Promise<{ liked: boolean; count: number }> {
+  async toggleLike(
+    postCode: number,
+    dni: string
+  ): Promise<{ liked: boolean; count: number }> {
     const post = await PostModel.query().findById(postCode);
-    
+
     if (!post) {
       throw new Error("Post not found");
     }
@@ -163,7 +169,7 @@ class PostService {
    */
   async toggleSave(postCode: number, dni: string): Promise<{ saved: boolean }> {
     const post = await PostModel.query().findById(postCode);
-    
+
     if (!post) {
       throw new Error("Post not found");
     }
@@ -207,7 +213,7 @@ class PostService {
    */
   async getStats(postCode: number): Promise<any> {
     const post = await PostModel.query().findById(postCode);
-    
+
     if (!post) {
       throw new Error("Post not found");
     }
@@ -236,7 +242,7 @@ class PostService {
       let files: IPostAttachment[] = [];
       if (fileCodes.length > 0) {
         const fileRecords = await byCodeIn(fileCodes);
-        files = fileRecords.map(f => ({
+        files = fileRecords.map((f) => ({
           code: f.code,
           name: f.name,
           type: f.type,

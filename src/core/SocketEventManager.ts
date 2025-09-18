@@ -36,7 +36,6 @@ export function connection(io: IO): void {
     cb();
   };
 
-
   /**
    * onConection
    */

@@ -1,17 +1,5 @@
 import { knex } from "../con/KnexConection";
 
-// PaymentService Types
-type PaymentFilters = {
-  code: number;
-  register_code: string;
-  pcode: number;
-  description: string | null;
-  topay: string;
-  paid: string | null;
-  amount: number;
-  payment_type: string | null;
-};
-
 export type PaymentRecord = {
   code: number;
   register_code: string;
@@ -49,7 +37,9 @@ export type IncomeRecord = {
 /**
  * Fetches all manual payments for a specific register
  */
-export const fetchPaymentsByRegister = async (registerCode: string): Promise<PaymentRecord[]> => {
+export const fetchPaymentsByRegister = async (
+  registerCode: string
+): Promise<PaymentRecord[]> => {
   return knex<PaymentRecord>("payment")
     .select(
       "code",
@@ -68,7 +58,9 @@ export const fetchPaymentsByRegister = async (registerCode: string): Promise<Pay
 /**
  * Fetches all income records with details for a specific register
  */
-export const fetchIncomesByRegister = async (registerCode: string): Promise<IncomeRecord[]> => {
+export const fetchIncomesByRegister = async (
+  registerCode: string
+): Promise<IncomeRecord[]> => {
   // First get the income records for this register
   const incomes = await knex("income as i")
     .select(
@@ -112,14 +104,17 @@ export const fetchIncomesByRegister = async (registerCode: string): Promise<Inco
     .orderBy("id.code");
 
   // Group details by income_code
-  const detailsMap = details.reduce((acc: any, detail: any) => {
-    const { income_code, ...detailData } = detail;
-    if (!acc[income_code]) {
-      acc[income_code] = [];
-    }
-    acc[income_code].push(detailData);
-    return acc;
-  }, {} as Record<number, any[]>);
+  const detailsMap = details.reduce(
+    (acc: any, detail: any) => {
+      const { income_code, ...detailData } = detail;
+      if (!acc[income_code]) {
+        acc[income_code] = [];
+      }
+      acc[income_code].push(detailData);
+      return acc;
+    },
+    {} as Record<number, any[]>
+  );
 
   // Combine incomes with their details
   return incomes.map((income: any) => ({

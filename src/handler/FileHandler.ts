@@ -33,7 +33,7 @@ class FileHandler {
     try {
       const { code } = req.params;
       const value = await byCode(parseInt(code));
-      
+
       if (!value) {
         res.status(404).json({ message: "File not found" });
         return;
@@ -66,10 +66,10 @@ class FileHandler {
   async fetchByUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { dni, parent_code, onlydir } = req.params;
-      
+
       // Ensure user directory exists
       await FileCore.ensureUserDirectory(dni);
-      
+
       const values = await byUser(dni, parent_code, onlydir === "true");
       res.status(200).json({ data: values });
     } catch (error) {
@@ -81,7 +81,11 @@ class FileHandler {
    * Get recent or heavy files
    * GET /api/v1/file/special/:dni/:mode
    */
-  async fetchRecentOrHeavy(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async fetchRecentOrHeavy(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const { dni, mode } = req.params;
       const values = await recentOrHeavy(dni, mode);
@@ -126,14 +130,14 @@ class FileHandler {
   async fetchSumSize(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { dni } = req.params;
-      
+
       // Get from database
       const dbSize: any = await sumSize(dni);
-      
+
       // Get actual filesystem usage for accuracy
       const actualSize = await FileCore.getUserStorageUsage(dni);
-      
-      res.status(200).json({ 
+
+      res.status(200).json({
         sum: dbSize?.sum || 0,
         actual: actualSize,
         unit: "bytes"
@@ -164,19 +168,19 @@ class FileHandler {
   async createDir(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const entityData: FileEntity = req.body;
-      
+
       // Ensure user directory exists first
       await FileCore.ensureUserDirectory(entityData.dni);
-      
+
       // Create directory in filesystem
       const directory = await FileCore.createDirectory(entityData);
-      
+
       // Store in database
       const value = await store(directory);
-      
-      res.status(201).json({ 
-        message: "Directory created successfully", 
-        data: value 
+
+      res.status(201).json({
+        message: "Directory created successfully",
+        data: value
       });
     } catch (error) {
       next(error);
@@ -196,18 +200,18 @@ class FileHandler {
 
       const file = req.files.file as UploadedFile;
       const entityData: FileEntity = JSON.parse(req.body.data);
-      
+
       // Ensure user directory exists
       await FileCore.ensureUserDirectory(entityData.dni);
-      
+
       // Determine file type based on extension
       const extension = path.extname(entityData.name).toLowerCase();
       const fileType = this.getFileType(extension);
       entityData.type = fileType;
-      
+
       // Upload file
       const uploadResult = await FileCore.uploadFile(file, entityData);
-      
+
       if (!uploadResult.success) {
         res.status(400).json({ message: uploadResult.message });
         return;
@@ -215,10 +219,10 @@ class FileHandler {
 
       // Store in database
       const value = await store(uploadResult.entity!);
-      
-      res.status(201).json({ 
-        message: "File uploaded successfully", 
-        data: value 
+
+      res.status(201).json({
+        message: "File uploaded successfully",
+        data: value
       });
     } catch (error) {
       next(error);
@@ -232,7 +236,7 @@ class FileHandler {
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code, name, parent_path } = req.body;
-      
+
       // Get existing file
       const existingFile = await byCode(code);
       if (!existingFile) {
@@ -283,7 +287,7 @@ class FileHandler {
   async deleteFile(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
-      
+
       // Delete from filesystem and database
       await destroy(+code, async (entity: FileEntity) => {
         const result = await FileCore.delete(entity);
@@ -305,7 +309,7 @@ class FileHandler {
   async moveToTrash(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
-      
+
       // Get file details
       const file = await byCode(+code);
       if (!file) {
@@ -340,7 +344,7 @@ class FileHandler {
   async cleanTrash(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { dni } = req.params;
-      
+
       // Delete from database and filesystem
       await deleteTrash(dni, async () => {
         const result = await FileCore.emptyTrash(dni);
@@ -362,7 +366,7 @@ class FileHandler {
   async downloadFile(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
-      
+
       const file = await byCode(+code);
       if (!file) {
         res.status(404).json({ message: "File not found" });
@@ -380,7 +384,7 @@ class FileHandler {
       // For directories, zip them first
       if (entity.type === "dir") {
         const archive = archiver("zip", { zlib: { level: 9 } });
-        
+
         res.attachment(`${entity.name}.zip`);
         archive.pipe(res);
         archive.directory(fullPath, false);
@@ -400,7 +404,7 @@ class FileHandler {
   async streamVideo(req: Request, res: Response): Promise<void> {
     try {
       const { code } = req.params;
-      
+
       const file = await byCode(+code);
       if (!file) {
         res.sendStatus(404);
@@ -424,23 +428,26 @@ class FileHandler {
         const chunkStart = Number(start);
         const chunkEnd = Number(end) || fileSize - 1;
         const chunkSize = chunkEnd - chunkStart + 1;
-        
-        const stream = fs.createReadStream(fullPath, { start: chunkStart, end: chunkEnd });
-        
+
+        const stream = fs.createReadStream(fullPath, {
+          start: chunkStart,
+          end: chunkEnd
+        });
+
         res.writeHead(206, {
           "Content-Range": `bytes ${chunkStart}-${chunkEnd}/${fileSize}`,
           "Accept-Ranges": "bytes",
           "Content-Length": chunkSize,
           "Content-Type": "video/mp4"
         });
-        
+
         stream.pipe(res);
       } else {
         res.writeHead(200, {
           "Content-Length": fileSize,
           "Content-Type": "video/mp4"
         });
-        
+
         fs.createReadStream(fullPath).pipe(res);
       }
     } catch (error) {
@@ -455,7 +462,7 @@ class FileHandler {
   async serveImage(req: Request, res: Response): Promise<void> {
     try {
       const { code } = req.params;
-      
+
       const file = await byCode(+code);
       if (!file) {
         res.sendStatus(404);
@@ -473,12 +480,12 @@ class FileHandler {
       const stat = fs.statSync(fullPath);
       const fileSize = stat.size;
       const extension = path.extname(entity.name).toLowerCase().substring(1);
-      
+
       res.writeHead(200, {
         "Content-Length": fileSize,
         "Content-Type": mimes[extension as keyof mimeTypes] || "application/octet-stream"
       });
-      
+
       fs.createReadStream(fullPath).pipe(res);
     } catch (error) {
       res.sendStatus(404);
@@ -490,19 +497,19 @@ class FileHandler {
    */
   private getFileType(extension: string): FileEntity["type"] {
     const ext = extension.toLowerCase().substring(1); // Remove the dot
-    
+
     const imageExts = ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"];
     const videoExts = ["mp4", "avi", "mov", "wmv", "flv", "mkv", "webm"];
     const audioExts = ["mp3", "wav", "flac", "aac", "ogg", "wma"];
     const docExts = ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt"];
     const zipExts = ["zip", "rar", "tar", "gz", "7z"];
-    
+
     if (imageExts.includes(ext)) return "img";
     if (videoExts.includes(ext)) return "vid";
     if (audioExts.includes(ext)) return "aud";
     if (docExts.includes(ext)) return "doc";
     if (zipExts.includes(ext)) return "zip";
-    
+
     return "otr";
   }
 }

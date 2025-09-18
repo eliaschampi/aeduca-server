@@ -40,9 +40,10 @@ class PostHandler {
       };
 
       // Create post with files if provided
-      const post = files && files.length > 0
-        ? await PostService.createWithFiles(postData, files)
-        : await PostService.create(postData);
+      const post =
+        files && files.length > 0
+          ? await PostService.createWithFiles(postData, files)
+          : await PostService.create(postData);
 
       res.status(201).json({
         message: "Post created successfully",
@@ -61,9 +62,9 @@ class PostHandler {
     try {
       const { dni, section_code } = req.user;
       const { page = 1, limit = 20 } = req.query;
-      
+
       const offset = (Number(page) - 1) * Number(limit);
-      
+
       const posts = await PostService.getUserFeed(
         dni,
         section_code,
@@ -91,9 +92,9 @@ class PostHandler {
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
-      
+
       const post = await PostService.getById(Number(code));
-      
+
       if (!post) {
         res.status(404).json({ message: "Post not found" });
         return;
@@ -113,14 +114,10 @@ class PostHandler {
     try {
       const { dni } = req.params;
       const { page = 1, limit = 20 } = req.query;
-      
+
       const offset = (Number(page) - 1) * Number(limit);
-      
-      const posts = await PostService.getUserPosts(
-        dni,
-        Number(limit),
-        offset
-      );
+
+      const posts = await PostService.getUserPosts(dni, Number(limit), offset);
 
       res.status(200).json({
         data: posts,
@@ -142,14 +139,10 @@ class PostHandler {
     try {
       const { dni } = req.user;
       const { page = 1, limit = 20 } = req.query;
-      
+
       const offset = (Number(page) - 1) * Number(limit);
-      
-      const posts = await PostService.getSavedPosts(
-        dni,
-        Number(limit),
-        offset
-      );
+
+      const posts = await PostService.getSavedPosts(dni, Number(limit), offset);
 
       res.status(200).json({
         data: posts,
@@ -305,14 +298,14 @@ class PostHandler {
   async search(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { q, page = 1, limit = 20 } = req.query;
-      
+
       if (!q || typeof q !== "string") {
         res.status(400).json({ message: "Search query is required" });
         return;
       }
 
       const offset = (Number(page) - 1) * Number(limit);
-      
+
       const posts = await PostService.search(q, {
         approved: true,
         limit: Number(limit),
@@ -339,7 +332,7 @@ class PostHandler {
   async getStats(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
-      
+
       const stats = await PostService.getStats(Number(code));
 
       res.status(200).json({ data: stats });

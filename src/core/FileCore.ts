@@ -34,13 +34,13 @@ class FileCore {
   getFullPath(entity: FileEntity): string {
     const { dni, parent_path, name } = entity;
     const userDir = path.join(this.storageRoot, dni);
-    
+
     if (parent_path && parent_path !== "null" && parent_path !== "/") {
       // Remove leading/trailing slashes and join
-      const cleanParentPath = parent_path.replace(/^\/|\/$/g, '');
+      const cleanParentPath = parent_path.replace(/^\/|\/$/g, "");
       return path.join(userDir, cleanParentPath, name);
     }
-    
+
     return path.join(userDir, name);
   }
 
@@ -83,10 +83,10 @@ class FileCore {
    */
   async createDirectory(entity: FileEntity): Promise<FileEntity> {
     const fullPath = this.getFullPath(entity);
-    
+
     // Ensure parent directories exist
     await fs.mkdir(fullPath, { recursive: true });
-    
+
     return {
       ...entity,
       size: 0,
@@ -108,12 +108,13 @@ class FileCore {
       if (!fileNameRegex.test(entity.name)) {
         return {
           success: false,
-          message: "Invalid file name. Use only alphanumeric characters, spaces, dots, hyphens, and underscores."
+          message:
+            "Invalid file name. Use only alphanumeric characters, spaces, dots, hyphens, and underscores."
         };
       }
 
       const fullPath = this.getFullPath(entity);
-      
+
       // Check if file already exists
       if (await this.exists(fullPath)) {
         return {
@@ -165,8 +166,8 @@ class FileCore {
   ): Promise<{ success: boolean; message: string }> {
     try {
       const oldPath = this.getFullPath(entity);
-      
-      if (!await this.exists(oldPath)) {
+
+      if (!(await this.exists(oldPath))) {
         return {
           success: false,
           message: "Source file/directory not found"
@@ -215,7 +216,7 @@ class FileCore {
     try {
       const fullPath = this.getFullPath(entity);
 
-      if (!await this.exists(fullPath)) {
+      if (!(await this.exists(fullPath))) {
         return {
           success: true,
           message: "File/directory not found (already deleted)"
@@ -223,7 +224,7 @@ class FileCore {
       }
 
       const stats = await fs.stat(fullPath);
-      
+
       if (stats.isDirectory()) {
         await fs.rm(fullPath, { recursive: true, force: true });
       } else {
@@ -248,7 +249,7 @@ class FileCore {
    */
   async moveToTrash(entity: FileEntity): Promise<{ success: boolean; message: string }> {
     const trashPath = path.join(this.getUserDirectory(entity.dni), "trash");
-    
+
     // Ensure trash directory exists
     await fs.mkdir(trashPath, { recursive: true });
 
@@ -261,7 +262,7 @@ class FileCore {
   async emptyTrash(dni: string): Promise<{ success: boolean; message: string }> {
     try {
       const trashPath = path.join(this.getUserDirectory(dni), "trash");
-      
+
       if (await this.exists(trashPath)) {
         await fs.rm(trashPath, { recursive: true, force: true });
         // Recreate empty trash directory
@@ -352,7 +353,7 @@ class FileCore {
    */
   async getUserStorageUsage(dni: string): Promise<number> {
     const userDir = this.getUserDirectory(dni);
-    if (!await this.exists(userDir)) {
+    if (!(await this.exists(userDir))) {
       return 0;
     }
     return await this.getDirectorySize(userDir);
@@ -363,7 +364,7 @@ class FileCore {
    */
   joinParentPath(parentPath: string | null, folderName: string): string {
     if (parentPath && parentPath !== "/" && parentPath !== "null") {
-      const cleanParent = parentPath.replace(/^\/|\/$/g, '');
+      const cleanParent = parentPath.replace(/^\/|\/$/g, "");
       return `/${cleanParent}/${folderName}/`;
     }
     return `/${folderName}/`;
@@ -376,7 +377,7 @@ class FileCore {
     const normalizedPath = path.normalize(pathToCheck);
     const resolvedPath = path.resolve(this.storageRoot, normalizedPath);
     const resolvedRoot = path.resolve(this.storageRoot);
-    
+
     return resolvedPath.startsWith(resolvedRoot);
   }
 }

@@ -11,16 +11,16 @@ export const fetchPaymentsByRegister = async (
 ): Promise<void> => {
   try {
     const { register_code } = req.params;
-    
+
     if (!register_code) {
-      res.status(400).json({ 
-        error: "register_code parameter is required" 
+      res.status(400).json({
+        error: "register_code parameter is required"
       });
       return;
     }
 
     const payments = await paymentService.fetchPaymentsByRegister(register_code);
-    
+
     res.status(200).json({
       success: true,
       data: payments,
@@ -41,16 +41,16 @@ export const fetchIncomesByRegister = async (
 ): Promise<void> => {
   try {
     const { register_code } = req.params;
-    
+
     if (!register_code) {
-      res.status(400).json({ 
-        error: "register_code parameter is required" 
+      res.status(400).json({
+        error: "register_code parameter is required"
       });
       return;
     }
 
     const incomes = await paymentService.fetchIncomesByRegister(register_code);
-    
+
     res.status(200).json({
       success: true,
       data: incomes,

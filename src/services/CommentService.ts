@@ -76,11 +76,7 @@ class CommentService {
   /**
    * Get comments by user
    */
-  async getUserComments(
-    dni: string,
-    limit = 20,
-    offset = 0
-  ): Promise<CommentModel[]> {
+  async getUserComments(dni: string, limit = 20, offset = 0): Promise<CommentModel[]> {
     return await CommentModel.query()
       .where("from_dni", dni)
       .withGraphFetched("post")
@@ -219,7 +215,7 @@ class CommentService {
   async getCommentThread(comment_code: number): Promise<CommentModel | undefined> {
     return await CommentModel.query()
       .findById(comment_code)
-      .withGraphFetched("replies.^");  // Recursive fetch all nested replies
+      .withGraphFetched("replies.^"); // Recursive fetch all nested replies
   }
 
   /**

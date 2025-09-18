@@ -22,12 +22,14 @@ const cli_origin: string = process.env.CLIURL || "*";
 const api_url: string = process.env.API || "/api/v1";
 
 // CORS configuration
-app.use(cors({ 
-  origin: cli_origin,
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+app.use(
+  cors({
+    origin: cli_origin,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  })
+);
 
 // Body parsing middleware
 app.use(express.urlencoded({ extended: true }));
