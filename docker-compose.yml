@@ -9,7 +9,7 @@ services:
       - .env
     environment:
       - PORT=${PORT}
-      - CLIURL=${CLIURL}   # ajusta al frontend real
+      - CLIURL=${CLIURL}
       - API=${API}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
@@ -18,15 +18,15 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - STORAGE=${STORAGE}
     volumes:
-      - .:/app              # montar código local (hot reload)
-      - /app/node_modules   # volumen anónimo para deps (no se pisan)
-      - ../drive:/drive      # montar directorio de archivos fuera del proyecto
+      - .:/app
+      - /app/node_modules 
+      - ../drive:/drive
     networks:
       - app-network
-      - aeduca-main_default
+      - main_default
 
 networks:
   app-network:
     driver: bridge
-  aeduca-main_default:
+  main_default:
     external: true
