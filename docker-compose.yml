@@ -14,28 +14,30 @@ services:
       - DB_NAME=aeduca
       - DB_USER=elias
       - DB_PASSWORD=7532
-      - MONGO_URL=mongodb://elias:doky@mongodb:27017/aeduca?authSource=admin
+      - STORAGE=../drive
     volumes:
       - .:/app              # montar código local (hot reload)
       - /app/node_modules   # volumen anónimo para deps (no se pisan)
+      - ./drive:/app/drive  # montar directorio de archivos
     depends_on:
-      - mongodb
+      - aeduca-postgres
     networks:
       - app-network
       - aeduca-main_default
 
-  mongodb:
-    container_name: servermongo
-    image: mongo:latest
+  aeduca-postgres:
+    container_name: aeduca-postgres
+    image: postgres:15
     restart: always
     environment:
-      - MONGO_INITDB_DATABASE=aeduca
-      - MONGO_INITDB_ROOT_USERNAME=elias
-      - MONGO_INITDB_ROOT_PASSWORD=doky
+      - POSTGRES_DB=aeduca
+      - POSTGRES_USER=elias
+      - POSTGRES_PASSWORD=7532
     volumes:
-      - ./mongodata:/data/db
+      - ./pgdata:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
     ports:
-      - "27017:27017"
+      - "5432:5432"
     networks:
       - app-network
 

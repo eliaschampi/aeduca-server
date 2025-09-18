@@ -2,7 +2,6 @@ import cors from "cors";
 import { config } from "dotenv";
 import express from "express";
 import { KnexConection } from "./src/con/KnexConection";
-import { connect as connectMongoDBService } from "./src/con/MongoConection";
 import { socketConection } from "./src/con/SocketConection";
 import useHelmet from "./src/config/helmet";
 import pgtype from "./src/config/pgtype";
@@ -13,50 +12,73 @@ import resHeader from "./src/middleware/resHeader";
 import uploader from "./src/middleware/uploader";
 import routes from "./src/routes";
 
+// Load environment variables
 config();
 
 const app = express();
 
-const port = parseInt(<string>process.env.PORT);
-const cli_origin: string = <string>process.env.CLIURL;
-const api_url: string = <string>process.env.API;
+const port = parseInt(process.env.PORT || "3000");
+const cli_origin: string = process.env.CLIURL || "*";
+const api_url: string = process.env.API || "/api/v1";
 
-app.use(cors({ origin: cli_origin }));
+// CORS configuration
+app.use(cors({ 
+  origin: cli_origin,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-app.use(
-  express.urlencoded({
-    extended: true
-  })
-);
-
+// Body parsing middleware
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Security middleware
 useHelmet(app);
 
+// PostgreSQL types configuration
 pgtype();
 
+// Database connection (PostgreSQL only)
 KnexConection();
 
-connectMongoDBService();
-
+// Socket.IO connection
 const server = socketConection(app);
 
+// Logging middleware
 app.use(logger);
 
+// Response headers middleware
 app.use(resHeader);
 
+// File upload middleware
 app.use(uploader);
 
-//app.use(secureApi);
-
+// API routes
 app.use(api_url, routes);
 
+// Error handling middleware
 app.use(error);
 
+// SPA configuration (if applicable)
 spa(app);
 
+// Start server
 server.listen(port, () => {
-  console.log("server running", port);
+  console.log(`🚀 Aeduca Server running on port ${port}`);
+  console.log(`📦 Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log(`🔌 API URL: ${api_url}`);
+  console.log(`✅ PostgreSQL connected`);
+  console.log(`🔄 Socket.IO enabled`);
+});
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  console.log("SIGTERM signal received: closing HTTP server");
+  server.close(() => {
+    console.log("HTTP server closed");
+    process.exit(0);
+  });
 });
 
 export default app;

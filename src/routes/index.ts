@@ -1,57 +1,67 @@
 import { Router } from "express";
-import verifyToken from "../middleware/verifyToken";
 
-// import sub-routers
-import auth from "./auth";
-import section from "./section";
-import person from "./person";
-import file from "./file";
-import profile from "./profile";
-import post from "./post";
-import attendance from "./attendance";
-import op from "./op";
-import schedule from "./schedule";
-import main from "./main";
-import room from "./room";
-import message from "./message";
-import register from "./register";
-import fileshare from "./fileshare";
-import comment from "./comment";
-import lesson from "./lesson";
-import content from "./content";
-import calification from "./calification";
-import response from "./response";
+// Import route modules
 import activity from "./activity";
-import score from "./score";
+import attendance from "./attendance";
+import auth from "./auth";
+import calification from "./calification";
+import comment from "./comment";
+import content from "./content";
+import file from "./file";
+import fileshare from "./fileshare";
+import lesson from "./lesson";
+import main from "./main";
+import op from "./op";
 import payment from "./payment";
-import { serveImage, streamVideo } from "../handler/FileHandler";
+import person from "./person";
+import post from "./post";
+import profile from "./profile";
+import register from "./register";
+import response from "./response";
+import schedule from "./schedule";
+import score from "./score";
+import section from "./section";
 
 const router = Router();
 
+// Health check endpoint
+router.get("/health", (req, res) => {
+  res.status(200).json({ 
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+// Mount route modules
+router.use("/activity", activity);
+router.use("/attendance", attendance);
 router.use("/auth", auth);
-router.get("/filedinary/stream/:fullpath", streamVideo);
-router.get("/filedinary/keseps/:fullpath", serveImage);
+router.use("/calification", calification);
+router.use("/comment", comment);
+router.use("/content", content);
+router.use("/file", file);
+router.use("/fileshare", fileshare);
+router.use("/lesson", lesson);
+router.use("/main", main);
+router.use("/op", op);
+router.use("/payment", payment);
+router.use("/person", person);
+router.use("/post", post);
+router.use("/profile", profile);
+router.use("/register", register);
+router.use("/response", response);
+router.use("/schedule", schedule);
+router.use("/score", score);
+router.use("/section", section);
 
-router.use("/section", verifyToken, section);
-router.use("/person", verifyToken, person);
-router.use("/", verifyToken, file);
-router.use("/profile", verifyToken, profile);
-router.use("/post", verifyToken, post);
-router.use("/attendance", verifyToken, attendance);
-router.use("/op", verifyToken, op);
-router.use("/schedule", verifyToken, schedule);
-router.use("/main", verifyToken, main);
-router.use("/room", verifyToken, room);
-router.use("/message", verifyToken, message);
-router.use("/register", verifyToken, register);
-router.use("/fileshare", verifyToken, fileshare);
-router.use("/comment", verifyToken, comment);
-router.use("/lesson", verifyToken, lesson);
-router.use("/content", verifyToken, content);
-router.use("/calification", verifyToken, calification);
-router.use("/response", verifyToken, response);
-router.use("/activity", verifyToken, activity);
-router.use("/score", verifyToken, score);
-router.use("/payment", verifyToken, payment);
+// 404 handler for unknown API routes
+router.use("*", (req, res) => {
+  res.status(404).json({ 
+    error: "Not Found",
+    message: "The requested API endpoint does not exist",
+    path: req.originalUrl
+  });
+});
 
-export = router;
+export default router;

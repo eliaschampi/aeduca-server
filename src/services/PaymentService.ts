@@ -1,6 +1,7 @@
 import { knex } from "../con/KnexConection";
 
-export interface PaymentRecord {
+// PaymentService Types
+type PaymentFilters = {
   code: number;
   register_code: string;
   pcode: number;
@@ -9,9 +10,20 @@ export interface PaymentRecord {
   paid: string | null;
   amount: number;
   payment_type: string | null;
-}
+};
 
-export interface IncomeRecord {
+export type PaymentRecord = {
+  code: number;
+  register_code: string;
+  pcode: number;
+  description: string | null;
+  topay: string;
+  paid: string | null;
+  amount: number;
+  payment_type: string | null;
+};
+
+export type IncomeRecord = {
   income_code: number;
   series: string | null;
   correlative: string;
@@ -32,7 +44,7 @@ export interface IncomeRecord {
     discount: number;
     paid: number;
   }>;
-}
+};
 
 /**
  * Fetches all manual payments for a specific register

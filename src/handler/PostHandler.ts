@@ -1,139 +1,352 @@
 import { NextFunction, Request, Response } from "express";
-import { io } from "../con/SocketConection";
-import { decoratePosts } from "../decorators/PostDecorator";
-import { IPostDecorated, NewPost } from "../model/Post";
-import {
-  deletePost,
-  fetchPosts,
-  mainCount,
-  newPost,
-  toggleFixed,
-  toggleSaved,
-  update
-} from "../services/PostService";
+import PostService from "../services/PostService";
+import { IPost } from "../model/Post";
+import Person from "../model/Person";
 
-export const fetchMain = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { dni, skip, take, uid } = req.params;
-    const values = decoratePosts(
-      <IPostDecorated[]>await fetchPosts(dni, +skip, +take, uid),
-      dni
-    );
-    return res.status(200).send({ values });
-  } catch (error) {
-    next(error);
-  }
-};
+/**
+ * PostHandler - Clean architecture for post endpoints
+ */
+class PostHandler {
+  /**
+   * Create a new post
+   * POST /api/v1/post
+   */
+  async create(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { content, commentable, link, share_with, files, approved } = req.body;
+      const { dni } = req.user;
 
-export const fetchCount = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { dni, uid } = req.params;
-    const count = await mainCount(dni, uid);
-    return res.status(200).send({ count });
-  } catch (error) {
-    next(error);
-  }
-};
+      // Get creator details
+      const creator = await Person.query()
+        .select("name", "lastname", "profile.image")
+        .leftJoin("profile", "person.dni", "profile.person_dni")
+        .where("person.dni", dni)
+        .first();
 
-export const createNewPost = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const reqData: any = {
-      content: req.body.content,
-      link: req.body.link,
-      share_w: req.body.share_w,
-      commentable: req.body.commentable,
-      aproved: req.body.aproved,
-      creator: req.body.creator,
-      files: req.body.files
-    };
-
-    const socketId = req.body.socketId;
-
-    const post = NewPost(reqData);
-
-    const { insertedId } = await newPost(post);
-    post._id = insertedId;
-
-    const ipostdecorated: IPostDecorated = {
-      ...post,
-      comment_count: 0
-    };
-
-    const decorated = decoratePosts([ipostdecorated], "");
-
-    // socket
-    if (insertedId && socketId && post.share_w.some((i) => i === "all")) {
-      const socket = io.of("/").sockets.get(socketId);
-
-      if (socket) {
-        socket.broadcast.emit("post:create", decorated[0]);
+      if (!creator) {
+        res.status(404).json({ message: "Creator not found" });
+        return;
       }
+
+      const postData: Partial<IPost> = {
+        content,
+        commentable: commentable !== false,
+        link,
+        creator_dni: dni,
+        creator_name: `${creator.name} ${creator.lastname}`,
+        creator_image: creator.image,
+        share_with: share_with || ["all"],
+        approved: approved || false
+      };
+
+      // Create post with files if provided
+      const post = files && files.length > 0
+        ? await PostService.createWithFiles(postData, files)
+        : await PostService.create(postData);
+
+      res.status(201).json({
+        message: "Post created successfully",
+        data: post
+      });
+    } catch (error) {
+      next(error);
     }
-
-    return res
-      .status(200)
-      .send({ message: "Correctamente guardado", value: decorated[0] });
-  } catch (error) {
-    next(error);
   }
-};
 
-export const updatePost = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { modifiedCount } = await update(
-      req.params._id,
-      req.body.content,
-      req.body.link
-    );
-    return res.status(200).send({ message: "Correctamente modificado", modifiedCount });
-  } catch (error) {
-    next(error);
-  }
-};
+  /**
+   * Get posts feed
+   * GET /api/v1/post/feed
+   */
+  async getFeed(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { dni, section_code } = req.user;
+      const { page = 1, limit = 20 } = req.query;
+      
+      const offset = (Number(page) - 1) * Number(limit);
+      
+      const posts = await PostService.getUserFeed(
+        dni,
+        section_code,
+        Number(limit),
+        offset
+      );
 
-export const fixedPost = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { fixed } = req.body;
-    const { modifiedCount } = await toggleFixed(req.params._id, fixed == 1 ? null : 1);
-    return res.status(200).send({ message: "Correctamente modificado", modifiedCount });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const savePost = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { tosave, dni } = req.body;
-    let mode: "add" | "remove" = "add";
-    let message = "Publicación guardada";
-    if (!tosave) {
-      mode = "remove";
-      message = "Se quitó de tus guardados";
+      res.status(200).json({
+        data: posts,
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total: posts.length
+        }
+      });
+    } catch (error) {
+      next(error);
     }
-    const { modifiedCount } = await toggleSaved(req.params._id, dni, mode);
-    return res.status(200).send({ message, modifiedCount });
-  } catch (error) {
-    next(error);
   }
-};
 
-export const destroyPost = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const post_id = req.params.post_id;
-    const socketId = req.params.socketId;
-    const { deletedCount } = await deletePost(post_id);
-
-    // socket
-    if (deletedCount && socketId) {
-      const socket = io.of("/").sockets.get(socketId);
-
-      if (socket) {
-        socket.broadcast.emit("post:delete", post_id);
+  /**
+   * Get single post by ID
+   * GET /api/v1/post/:code
+   */
+  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { code } = req.params;
+      
+      const post = await PostService.getById(Number(code));
+      
+      if (!post) {
+        res.status(404).json({ message: "Post not found" });
+        return;
       }
-    }
 
-    return res.status(200).send({ message: "Correctamente elimiando" });
-  } catch (error) {
-    next(error);
+      res.status(200).json({ data: post });
+    } catch (error) {
+      next(error);
+    }
   }
-};
+
+  /**
+   * Get user's posts
+   * GET /api/v1/post/user/:dni
+   */
+  async getUserPosts(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { dni } = req.params;
+      const { page = 1, limit = 20 } = req.query;
+      
+      const offset = (Number(page) - 1) * Number(limit);
+      
+      const posts = await PostService.getUserPosts(
+        dni,
+        Number(limit),
+        offset
+      );
+
+      res.status(200).json({
+        data: posts,
+        pagination: {
+          page: Number(page),
+          limit: Number(limit)
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get saved posts
+   * GET /api/v1/post/saved
+   */
+  async getSavedPosts(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { dni } = req.user;
+      const { page = 1, limit = 20 } = req.query;
+      
+      const offset = (Number(page) - 1) * Number(limit);
+      
+      const posts = await PostService.getSavedPosts(
+        dni,
+        Number(limit),
+        offset
+      );
+
+      res.status(200).json({
+        data: posts,
+        pagination: {
+          page: Number(page),
+          limit: Number(limit)
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Update a post
+   * PUT /api/v1/post/:code
+   */
+  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { code } = req.params;
+      const { dni } = req.user;
+      const { content, commentable, link, share_with } = req.body;
+
+      // Check ownership
+      const post = await PostService.getById(Number(code));
+      if (!post) {
+        res.status(404).json({ message: "Post not found" });
+        return;
+      }
+
+      if (post.creator_dni !== dni) {
+        res.status(403).json({ message: "You can only edit your own posts" });
+        return;
+      }
+
+      const updateData: Partial<IPost> = {};
+      if (content !== undefined) updateData.content = content;
+      if (commentable !== undefined) updateData.commentable = commentable;
+      if (link !== undefined) updateData.link = link;
+      if (share_with !== undefined) updateData.share_with = share_with;
+
+      const updatedPost = await PostService.update(Number(code), updateData);
+
+      res.status(200).json({
+        message: "Post updated successfully",
+        data: updatedPost
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Delete a post
+   * DELETE /api/v1/post/:code
+   */
+  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { code } = req.params;
+      const { dni, rol_code } = req.user;
+
+      // Check ownership or admin role
+      const post = await PostService.getById(Number(code));
+      if (!post) {
+        res.status(404).json({ message: "Post not found" });
+        return;
+      }
+
+      if (post.creator_dni !== dni && rol_code !== "a") {
+        res.status(403).json({ message: "You can only delete your own posts" });
+        return;
+      }
+
+      await PostService.delete(Number(code));
+
+      res.status(200).json({ message: "Post deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Toggle like on a post
+   * POST /api/v1/post/:code/like
+   */
+  async toggleLike(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { code } = req.params;
+      const { dni } = req.user;
+
+      const result = await PostService.toggleLike(Number(code), dni);
+
+      res.status(200).json({
+        message: result.liked ? "Post liked" : "Post unliked",
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Toggle save on a post
+   * POST /api/v1/post/:code/save
+   */
+  async toggleSave(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { code } = req.params;
+      const { dni } = req.user;
+
+      const result = await PostService.toggleSave(Number(code), dni);
+
+      res.status(200).json({
+        message: result.saved ? "Post saved" : "Post unsaved",
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Approve or reject a post (admin only)
+   * PATCH /api/v1/post/:code/approve
+   */
+  async setApproval(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { code } = req.params;
+      const { approved } = req.body;
+      const { rol_code } = req.user;
+
+      // Check admin role
+      if (rol_code !== "a") {
+        res.status(403).json({ message: "Only administrators can approve posts" });
+        return;
+      }
+
+      const post = await PostService.setApprovalStatus(Number(code), approved);
+
+      res.status(200).json({
+        message: `Post ${approved ? "approved" : "rejected"}`,
+        data: post
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Search posts
+   * GET /api/v1/post/search
+   */
+  async search(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { q, page = 1, limit = 20 } = req.query;
+      
+      if (!q || typeof q !== "string") {
+        res.status(400).json({ message: "Search query is required" });
+        return;
+      }
+
+      const offset = (Number(page) - 1) * Number(limit);
+      
+      const posts = await PostService.search(q, {
+        approved: true,
+        limit: Number(limit),
+        offset
+      });
+
+      res.status(200).json({
+        data: posts,
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          query: q
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get post statistics
+   * GET /api/v1/post/:code/stats
+   */
+  async getStats(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { code } = req.params;
+      
+      const stats = await PostService.getStats(Number(code));
+
+      res.status(200).json({ data: stats });
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+export default new PostHandler();

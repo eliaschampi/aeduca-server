@@ -1,188 +1,384 @@
 import { UploadedFile } from "express-fileupload";
 import path from "path";
-import fs from "fs";
-import { Callvar, fileVal } from "../config/const";
+import fs from "fs/promises";
+import fsSync from "fs";
 import { FileEntity } from "../model/File";
 
-export function joinpath({ dni, parent_path, name }: FileEntity): string {
-  const STORAGE: string = <string>process.env.STORAGE;
+/**
+ * FileCore - Clean and efficient file management system
+ */
+class FileCore {
+  private storageRoot: string;
 
-  if (parent_path && parent_path !== "null") {
-    return path.join(STORAGE, dni, parent_path, name);
+  constructor() {
+    this.storageRoot = process.env.STORAGE || "../drive";
+    this.ensureStorageRoot();
   }
 
-  return path.join(STORAGE, dni, name);
-}
-
-export function checkPath(checkablepath: string): boolean {
-  return fs.existsSync(checkablepath);
-}
-
-export function simplejoinpath(parent_path: string, foldername: string): string {
-  if (parent_path) {
-    return path.join(parent_path, foldername, "/");
-  }
-  return `/${foldername}/`;
-}
-
-export function deleteSimple(fullparent: string, name: string): void {
-  const fullpath = path.join(fullparent, name);
-  if (checkPath(fullpath)) {
-    fs.unlinkSync(fullpath);
-  }
-}
-
-export function uploadSimple(
-  file: UploadedFile,
-  parent: string,
-  name: string
-): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const fullpath = path.join(parent, name);
-    file.mv(fullpath, (err: any) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(true);
-    });
-  });
-}
-
-export function checkPathAndGet(fileEntity: FileEntity): string {
-  const fullpath = joinpath(fileEntity);
-  if (!checkPath(fullpath)) {
-    throw new Error("Archivo no encontrado");
-  }
-  return fullpath;
-}
-
-export const createDirectory = (fileEntity: FileEntity): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    fs.mkdir(joinpath(fileEntity), { recursive: true }, (err) => {
-      if (err) reject(err);
-      resolve({
-        ...fileEntity,
-        size: 0,
-        type: "dir"
-      });
-    });
-  });
-};
-
-export const uploadFile = (
-  myfile: UploadedFile,
-  p_type: string,
-  fileEntity: FileEntity,
-  cb: Callvar
-): void => {
-  const fullpath = joinpath(fileEntity);
-  if (!fileVal.test(fileEntity.name)) {
-    throw new Error("Archivo no admitido");
-  }
-  if (checkPath(fullpath)) {
-    throw new Error("El archivo ya existe");
-  }
-  if (myfile.size > (p_type === "t" ? 60 : 25) * 1024 * 1024) {
-    throw new Error("límite de peso excedido");
-  }
-  myfile.mv(fullpath, (err) => {
-    if (err) {
-      throw new Error(err.message);
+  /**
+   * Ensure storage root directory exists
+   */
+  private async ensureStorageRoot(): Promise<void> {
+    const absolutePath = path.resolve(this.storageRoot);
+    try {
+      await fs.access(absolutePath);
+    } catch {
+      await fs.mkdir(absolutePath, { recursive: true });
+      console.log(`Created storage root: ${absolutePath}`);
     }
-    cb({ status: 200, message: "Un archivo se subió con éxito", fullpath });
-  });
-};
+  }
 
-export const renameOrMove = (
-  file: FileEntity,
-  new_name: string,
-  new_pp: string
-): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    const oldpath = joinpath(file);
-    if (!checkPath(oldpath)) {
-      reject({ message: "Archivo no encontrado" });
+  /**
+   * Get the full path for a file entity
+   */
+  getFullPath(entity: FileEntity): string {
+    const { dni, parent_path, name } = entity;
+    const userDir = path.join(this.storageRoot, dni);
+    
+    if (parent_path && parent_path !== "null" && parent_path !== "/") {
+      // Remove leading/trailing slashes and join
+      const cleanParentPath = parent_path.replace(/^\/|\/$/g, '');
+      return path.join(userDir, cleanParentPath, name);
     }
+    
+    return path.join(userDir, name);
+  }
 
-    const newpath = joinpath({
-      dni: file.dni,
-      parent_path: new_pp,
-      name: new_name
-    });
+  /**
+   * Get user's root directory
+   */
+  getUserDirectory(dni: string): string {
+    return path.join(this.storageRoot, dni);
+  }
 
-    if (checkPath(newpath)) {
-      reject({ message: "El archivo ya existe" });
+  /**
+   * Ensure user directory exists
+   */
+  async ensureUserDirectory(dni: string): Promise<void> {
+    const userDir = this.getUserDirectory(dni);
+    await fs.mkdir(userDir, { recursive: true });
+  }
+
+  /**
+   * Check if a path exists
+   */
+  async exists(filePath: string): Promise<boolean> {
+    try {
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
     }
+  }
 
-    if (new_pp === "/trash/") {
-      const jointrash = path.join(<string>process.env.STORAGE, file.dni, new_pp);
-      if (!checkPath(jointrash)) {
-        fs.mkdirSync(jointrash);
+  /**
+   * Check if path exists (sync version for compatibility)
+   */
+  existsSync(filePath: string): boolean {
+    return fsSync.existsSync(filePath);
+  }
+
+  /**
+   * Create a directory
+   */
+  async createDirectory(entity: FileEntity): Promise<FileEntity> {
+    const fullPath = this.getFullPath(entity);
+    
+    // Ensure parent directories exist
+    await fs.mkdir(fullPath, { recursive: true });
+    
+    return {
+      ...entity,
+      size: 0,
+      type: "dir"
+    };
+  }
+
+  /**
+   * Upload a file
+   */
+  async uploadFile(
+    file: UploadedFile,
+    entity: FileEntity,
+    maxSizeMB: number = 25
+  ): Promise<{ success: boolean; message: string; entity?: FileEntity }> {
+    try {
+      // Validate file name
+      const fileNameRegex = /^[a-zA-Z0-9_\-. ]+$/;
+      if (!fileNameRegex.test(entity.name)) {
+        return {
+          success: false,
+          message: "Invalid file name. Use only alphanumeric characters, spaces, dots, hyphens, and underscores."
+        };
       }
-    }
 
-    fs.rename(oldpath, newpath, (err) => {
-      if (err) {
-        reject(err);
+      const fullPath = this.getFullPath(entity);
+      
+      // Check if file already exists
+      if (await this.exists(fullPath)) {
+        return {
+          success: false,
+          message: "File already exists"
+        };
       }
-      resolve(true);
-    });
-  });
-};
 
-export const deleteDirOrFile = (fileEntity: FileEntity): Promise<any> => {
-  const fullpath = joinpath(fileEntity);
-  return new Promise((resolve, reject) => {
-    if (checkPath(fullpath)) {
-      if (fileEntity.type === "dir") {
-        fs.rmdir(fullpath, { recursive: true }, (err) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(true);
-        });
-      } else {
-        fs.unlink(fullpath, (err) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(true);
-        });
+      // Check file size
+      const maxSize = maxSizeMB * 1024 * 1024;
+      if (file.size > maxSize) {
+        return {
+          success: false,
+          message: `File size exceeds ${maxSizeMB}MB limit`
+        };
       }
-    } else {
-      resolve(false);
-    }
-  });
-};
 
-export const deleteTrashFolder = (dni: string): Promise<boolean> => {
-  return new Promise((resolve, reject) => {
-    const fullpath = joinpath({ dni, parent_path: "trash", name: "" });
-    fs.rmdir(fullpath, { recursive: true }, (err) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(true);
-    });
-  });
-};
+      // Ensure parent directory exists
+      const parentDir = path.dirname(fullPath);
+      await fs.mkdir(parentDir, { recursive: true });
 
-export const charResourcesPath = (room: string, filename = ""): string => {
-  return path.join(<string>process.env.CHAT_RESOURCES, `room_${room}`, filename);
-};
+      // Move file to destination
+      await file.mv(fullPath);
 
-export const deleteRoomFolder = (room: string): Promise<boolean> => {
-  const fullpath = charResourcesPath(room);
-  return new Promise((resolve, reject) => {
-    if (checkPath(fullpath)) {
-      fs.rmdir(fullpath, { recursive: true }, (err) => {
-        if (err) {
-          reject(err);
+      return {
+        success: true,
+        message: "File uploaded successfully",
+        entity: {
+          ...entity,
+          size: file.size
         }
-        resolve(true);
-      });
-    } else {
-      resolve(true);
+      };
+    } catch (error) {
+      console.error("Upload error:", error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "Upload failed"
+      };
     }
-  });
-};
+  }
+
+  /**
+   * Rename or move a file/directory
+   */
+  async renameOrMove(
+    entity: FileEntity,
+    newName: string,
+    newParentPath?: string
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const oldPath = this.getFullPath(entity);
+      
+      if (!await this.exists(oldPath)) {
+        return {
+          success: false,
+          message: "Source file/directory not found"
+        };
+      }
+
+      const newEntity = {
+        ...entity,
+        name: newName,
+        parent_path: newParentPath !== undefined ? newParentPath : entity.parent_path
+      };
+
+      const newPath = this.getFullPath(newEntity);
+
+      if (await this.exists(newPath)) {
+        return {
+          success: false,
+          message: "Destination already exists"
+        };
+      }
+
+      // Ensure destination directory exists
+      const destDir = path.dirname(newPath);
+      await fs.mkdir(destDir, { recursive: true });
+
+      // Rename/move the file
+      await fs.rename(oldPath, newPath);
+
+      return {
+        success: true,
+        message: "Successfully renamed/moved"
+      };
+    } catch (error) {
+      console.error("Rename/move error:", error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "Operation failed"
+      };
+    }
+  }
+
+  /**
+   * Delete a file or directory
+   */
+  async delete(entity: FileEntity): Promise<{ success: boolean; message: string }> {
+    try {
+      const fullPath = this.getFullPath(entity);
+
+      if (!await this.exists(fullPath)) {
+        return {
+          success: true,
+          message: "File/directory not found (already deleted)"
+        };
+      }
+
+      const stats = await fs.stat(fullPath);
+      
+      if (stats.isDirectory()) {
+        await fs.rm(fullPath, { recursive: true, force: true });
+      } else {
+        await fs.unlink(fullPath);
+      }
+
+      return {
+        success: true,
+        message: "Successfully deleted"
+      };
+    } catch (error) {
+      console.error("Delete error:", error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "Delete failed"
+      };
+    }
+  }
+
+  /**
+   * Move to trash (special handling)
+   */
+  async moveToTrash(entity: FileEntity): Promise<{ success: boolean; message: string }> {
+    const trashPath = path.join(this.getUserDirectory(entity.dni), "trash");
+    
+    // Ensure trash directory exists
+    await fs.mkdir(trashPath, { recursive: true });
+
+    return await this.renameOrMove(entity, entity.name, "/trash/");
+  }
+
+  /**
+   * Empty trash for a user
+   */
+  async emptyTrash(dni: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const trashPath = path.join(this.getUserDirectory(dni), "trash");
+      
+      if (await this.exists(trashPath)) {
+        await fs.rm(trashPath, { recursive: true, force: true });
+        // Recreate empty trash directory
+        await fs.mkdir(trashPath, { recursive: true });
+      }
+
+      return {
+        success: true,
+        message: "Trash emptied successfully"
+      };
+    } catch (error) {
+      console.error("Empty trash error:", error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "Failed to empty trash"
+      };
+    }
+  }
+
+  /**
+   * Get file/directory stats
+   */
+  async getStats(entity: FileEntity): Promise<fsSync.Stats | null> {
+    try {
+      const fullPath = this.getFullPath(entity);
+      return await fs.stat(fullPath);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * List directory contents
+   */
+  async listDirectory(entity: FileEntity): Promise<string[]> {
+    try {
+      const fullPath = this.getFullPath(entity);
+      return await fs.readdir(fullPath);
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Create a read stream for file downloads
+   */
+  createReadStream(entity: FileEntity): fsSync.ReadStream {
+    const fullPath = this.getFullPath(entity);
+    return fsSync.createReadStream(fullPath);
+  }
+
+  /**
+   * Get file size
+   */
+  async getFileSize(entity: FileEntity): Promise<number> {
+    const stats = await this.getStats(entity);
+    return stats?.size || 0;
+  }
+
+  /**
+   * Calculate directory size recursively
+   */
+  async getDirectorySize(dirPath: string): Promise<number> {
+    let totalSize = 0;
+
+    try {
+      const items = await fs.readdir(dirPath);
+
+      for (const item of items) {
+        const itemPath = path.join(dirPath, item);
+        const stats = await fs.stat(itemPath);
+
+        if (stats.isDirectory()) {
+          totalSize += await this.getDirectorySize(itemPath);
+        } else {
+          totalSize += stats.size;
+        }
+      }
+    } catch (error) {
+      console.error("Error calculating directory size:", error);
+    }
+
+    return totalSize;
+  }
+
+  /**
+   * Get user's total storage usage
+   */
+  async getUserStorageUsage(dni: string): Promise<number> {
+    const userDir = this.getUserDirectory(dni);
+    if (!await this.exists(userDir)) {
+      return 0;
+    }
+    return await this.getDirectorySize(userDir);
+  }
+
+  /**
+   * Simple join path for parent path updates
+   */
+  joinParentPath(parentPath: string | null, folderName: string): string {
+    if (parentPath && parentPath !== "/" && parentPath !== "null") {
+      const cleanParent = parentPath.replace(/^\/|\/$/g, '');
+      return `/${cleanParent}/${folderName}/`;
+    }
+    return `/${folderName}/`;
+  }
+
+  /**
+   * Validate storage path to prevent directory traversal
+   */
+  isValidPath(pathToCheck: string): boolean {
+    const normalizedPath = path.normalize(pathToCheck);
+    const resolvedPath = path.resolve(this.storageRoot, normalizedPath);
+    const resolvedRoot = path.resolve(this.storageRoot);
+    
+    return resolvedPath.startsWith(resolvedRoot);
+  }
+}
+
+export default new FileCore();

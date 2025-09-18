@@ -1,36 +1,37 @@
 import { Router } from "express";
-import {
-  cleanTrash,
-  createDir,
-  deleteFile,
-  downloadFile,
-  fetchByTag,
-  fetchByTrash,
-  fetchByUser,
-  fetchRecentOrHeavy,
-  fetchShared,
-  fetchSumSize,
-  search,
-  storeFile,
-  update,
-  fetchByCode
-} from "../handler/FileHandler";
+import FileHandler from "../handler/FileHandler";
+import verifyToken from "../middleware/verifyToken";
 
 const router = Router();
 
-router.get("/file/:code", fetchByCode);
-router.get("/file/:dni/:query", search);
-router.get("/all_files/:dni/:parent_code/:onlydir?", fetchByUser);
-router.get("/rh_files/:dni/:mode", fetchRecentOrHeavy);
-router.get("/tag_files/:dni/:tag", fetchByTag);
-router.get("/sum_files/:dni", fetchSumSize);
-router.get("/trash_files/:dni", fetchByTrash);
-router.get("/shared_files/:dni/:section_code?", fetchShared);
-router.post("/file/dir", createDir);
-router.post("/file", storeFile);
-router.put("/file", update);
-router.delete("/file/:code", deleteFile);
-router.delete("/trash/:dni", cleanTrash);
-router.get("/dw_file/:code", downloadFile);
+// All file routes require authentication
+router.use(verifyToken);
+
+// File operations
+router.get("/:code", FileHandler.fetchByCode);
+router.post("/directory", FileHandler.createDir);
+router.post("/upload", FileHandler.storeFile);
+router.put("/update", FileHandler.update);
+router.delete("/:code", FileHandler.deleteFile);
+
+// File browsing
+router.get("/user/:dni/:parent_code/:onlydir", FileHandler.fetchByUser);
+router.get("/search/:dni/:query", FileHandler.search);
+router.get("/special/:dni/:mode", FileHandler.fetchRecentOrHeavy);
+router.get("/tag/:dni/:tag", FileHandler.fetchByTag);
+
+// Storage management
+router.get("/usage/:dni", FileHandler.fetchSumSize);
+router.get("/trash/:dni", FileHandler.fetchByTrash);
+router.post("/:code/trash", FileHandler.moveToTrash);
+router.delete("/trash/:dni", FileHandler.cleanTrash);
+
+// Sharing
+router.get("/shared/:dni/:section_code", FileHandler.fetchShared);
+
+// File serving
+router.get("/download/:code", FileHandler.downloadFile);
+router.get("/stream/:code", FileHandler.streamVideo);
+router.get("/image/:code", FileHandler.serveImage);
 
 export default router;

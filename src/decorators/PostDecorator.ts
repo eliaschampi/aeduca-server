@@ -1,4 +1,18 @@
-import { IPostDecorated } from "../model/Post";
+// PostDecorator - Legacy decorator for post display (may need refactoring)
+type IPostDecorated = {
+  code?: number;
+  content: string;
+  link?: string;
+  likes?: string[];
+  savelist?: string[];
+  files?: Array<{
+    type: string;
+    full_route?: string;
+  }>;
+  comment_count?: number;
+  comment?: any;
+};
+
 //eslint-disable-next-line
 export function decoratePosts(posts: IPostDecorated[], dni: string) {
   return posts.map((item) => {
@@ -34,7 +48,7 @@ export function decoratePosts(posts: IPostDecorated[], dni: string) {
     const splited = c.exec(<string>item.link);
 
     if (item.likes) {
-      liked = item.likes.some((l) => l === dni);
+      liked = item.likes.some((l: string) => l === dni);
       likes = item.likes;
     }
 
@@ -46,7 +60,7 @@ export function decoratePosts(posts: IPostDecorated[], dni: string) {
     if (item.savelist) {
       console.log(item);
 
-      saved = item.savelist.some((s) => s === dni);
+      saved = item.savelist.some((s: string) => s === dni);
       delete item.savelist;
     }
 

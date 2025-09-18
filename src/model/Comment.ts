@@ -1,47 +1,118 @@
-import { ObjectId } from "bson";
-import { Collection } from "mongodb";
-import { db } from "../con/MongoConection";
-import { Attached } from "./File";
-import { personSingle } from "./Person";
+import { Model } from "objection";
+import PostModel from "./Post";
+import Person from "./Person";
 
-const COMMENT_COLLECTION = "comment";
+export type ICommentAttachment = {
+  code: number;
+  name: string;
+  type: string;
+  size: number;
+  dni: string;
+};
 
 export type IComment = {
-  _id?: ObjectId;
-  from: personSingle;
-  post: string;
+  code?: number;
+  post_code: number;
+  from_dni: string;
+  from_name: string;
+  from_image?: string;
   message: string;
-  attached?: Attached;
-  reply_id?: string;
+  attached?: ICommentAttachment;
+  reply_to_id?: number;
   content_type: string;
   url?: string;
-  created_at: Date;
+  created_at?: Date;
   updated_at?: Date;
 };
 
-export type INewComment = {
-  from: personSingle;
-  post: string;
-  message: string;
-  attached?: Attached;
-  reply_id?: string;
-  content_type: string;
+class CommentModel extends Model {
+  code!: number;
+  post_code!: number;
+  from_dni!: string;
+  from_name!: string;
+  from_image?: string;
+  message!: string;
+  attached?: ICommentAttachment;
+  reply_to_code?: number;
+  content_type!: string;
   url?: string;
-};
+  created_at?: Date;
+  updated_at?: Date;
 
-export const NewComment = (comment: INewComment): IComment => {
-  return {
-    from: comment.from,
-    post: comment.post,
-    message: comment.message,
-    attached: comment.attached,
-    reply_id: comment.reply_id,
-    content_type: comment.content_type,
-    url: comment.url,
-    created_at: new Date()
-  };
-};
+  static get tableName(): string {
+    return "comment";
+  }
 
-export const COMMENT = (): Collection<IComment> => {
-  return db.collection<IComment>(COMMENT_COLLECTION);
-};
+  static get idColumn(): string {
+    return "code";
+  }
+
+  static get jsonSchema() {
+    return {
+      type: "object",
+      required: ["post_code", "from_dni", "from_name", "message", "content_type"],
+      properties: {
+        code: { type: "integer" },
+        post_code: { type: "integer" },
+        from_dni: { type: "string", minLength: 8, maxLength: 8 },
+        from_name: { type: "string" },
+        from_image: { type: ["string", "null"] },
+        message: { type: "string" },
+        attached: {
+          type: ["object", "null"],
+          properties: {
+            code: { type: "integer" },
+            name: { type: "string" },
+            type: { type: "string" },
+            size: { type: "integer" },
+            dni: { type: "string" }
+          }
+        },
+        reply_to_code: { type: ["integer", "null"] },
+        content_type: { type: "string" },
+        url: { type: ["string", "null"] },
+        created_at: { type: ["string", "null"] },
+        updated_at: { type: ["string", "null"] }
+      }
+    };
+  }
+
+  static get relationMappings(): any {
+    return {
+      post: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: PostModel,
+        join: {
+          from: "comment.post_code",
+          to: "post.code"
+        }
+      },
+      from: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Person,
+        join: {
+          from: "comment.from_dni",
+          to: "person.dni"
+        }
+      },
+      replyTo: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: CommentModel,
+        join: {
+          from: "comment.reply_to_code",
+          to: "comment.code"
+        }
+      },
+      replies: {
+        relation: Model.HasManyRelation,
+        modelClass: CommentModel,
+        join: {
+          from: "comment.code",
+          to: "comment.reply_to_code"
+        }
+      }
+    };
+  }
+}
+
+export default CommentModel;
