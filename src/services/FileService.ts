@@ -142,7 +142,11 @@ export const deleteTrash = async (
   destroyTrashFiles: Callvar
 ): Promise<boolean> => {
   return await File.transaction(async (tsx) => {
-    await tsx.where("dni", dni).where("parent_path", "/trash/").delete();
+    // Properly reference the "file" table using Objection's query builder with the current transaction
+    await File.query(tsx)
+      .where("dni", dni)
+      .where("parent_path", "/trash/")
+      .delete();
 
     await destroyTrashFiles(dni);
 
