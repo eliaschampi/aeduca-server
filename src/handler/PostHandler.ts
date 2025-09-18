@@ -14,7 +14,7 @@ class PostHandler {
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { content, commentable, link, share_with, files, approved } = req.body;
-      const { dni } = req.user;
+      const { dni } = req.params;
 
       // Get creator details
       const creator = await Person.query()
@@ -60,14 +60,14 @@ class PostHandler {
    */
   async getFeed(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { dni, section_code } = req.user;
+      const { dni, section_code } = req.params;
       const { page = 1, limit = 20 } = req.query;
 
       const offset = (Number(page) - 1) * Number(limit);
 
       const posts = await PostService.getUserFeed(
         dni,
-        section_code,
+        section_code || "",
         Number(limit),
         offset
       );
@@ -137,7 +137,7 @@ class PostHandler {
    */
   async getSavedPosts(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { dni } = req.user;
+      const { dni } = req.params;
       const { page = 1, limit = 20 } = req.query;
 
       const offset = (Number(page) - 1) * Number(limit);
@@ -162,8 +162,7 @@ class PostHandler {
    */
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { code } = req.params;
-      const { dni } = req.user;
+      const { code, dni } = req.params;
       const { content, commentable, link, share_with } = req.body;
 
       // Check ownership
@@ -201,8 +200,8 @@ class PostHandler {
    */
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { code } = req.params;
-      const { dni, rol_code } = req.user;
+      const { code, dni } = req.params;
+      const { rol_code } = req.body || {};
 
       // Check ownership or admin role
       const post = await PostService.getById(Number(code));
@@ -231,7 +230,7 @@ class PostHandler {
   async toggleLike(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
-      const { dni } = req.user;
+      const { dni } = req.body;
 
       const result = await PostService.toggleLike(Number(code), dni);
 
@@ -251,7 +250,7 @@ class PostHandler {
   async toggleSave(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
-      const { dni } = req.user;
+      const { dni } = req.body;
 
       const result = await PostService.toggleSave(Number(code), dni);
 
@@ -271,8 +270,7 @@ class PostHandler {
   async setApproval(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
-      const { approved } = req.body;
-      const { rol_code } = req.user;
+      const { approved, rol_code } = req.body;
 
       // Check admin role
       if (rol_code !== "a") {

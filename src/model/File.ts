@@ -27,6 +27,16 @@ export type mimeTypes = {
 };
 
 class File extends Model {
+  code!: number;
+  dni!: string;
+  name!: string;
+  parent_path?: string;
+  parent_code?: number;
+  size?: number;
+  type?: "dir" | "doc" | "vid" | "img" | "aud" | "zip" | "otr";
+  full_route?: string;
+  created_at?: string;
+
   static get tableName(): string {
     return "file";
   }

@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
+
 //eslint-disable-next-line
 export default (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers["authorization"];

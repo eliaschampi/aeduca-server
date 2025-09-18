@@ -14,12 +14,12 @@ router.get("/:code/thread", CommentHandler.getThread);
 router.use(verifyToken); // Apply auth middleware to all routes below
 
 // CRUD operations
-router.post("/", CommentHandler.create);
-router.put("/:code", CommentHandler.update);
-router.delete("/:code", CommentHandler.delete);
+router.post("/:dni", CommentHandler.create);
+router.put("/:code/:dni", CommentHandler.update);
+router.delete("/:code/:dni", CommentHandler.delete);
 
 // Reply to comment
-router.post("/:code/reply", CommentHandler.reply);
+router.post("/:code/reply/:dni", CommentHandler.reply);
 
 // User-specific routes
 router.get("/user/:dni", CommentHandler.getUserComments);

@@ -10,6 +10,12 @@ export type personSingle = {
 };
 
 class Person extends Model {
+  dni!: string;
+  name?: string;
+  lastname?: string;
+  image?: string;
+  full_name?: string;
+
   static get tableName(): string {
     return "person";
   }

@@ -18,7 +18,7 @@ export type IComment = {
   from_image?: string;
   message: string;
   attached?: ICommentAttachment;
-  reply_to_id?: number;
+  reply_to_code?: number;
   content_type: string;
   url?: string;
   created_at?: Date;

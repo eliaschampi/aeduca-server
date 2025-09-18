@@ -21,7 +21,7 @@ class CommentHandler {
         url,
         file_code
       } = req.body;
-      const { dni } = req.user;
+      const { dni } = req.params;
 
       // Get commenter details
       const commenter = await Person.query()
@@ -143,8 +143,7 @@ class CommentHandler {
    */
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { code } = req.params;
-      const { dni } = req.user;
+      const { code, dni } = req.params;
       const { message } = req.body;
 
       // Check ownership
@@ -177,7 +176,8 @@ class CommentHandler {
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
-      const { dni, rol_code } = req.user;
+      const { dni } = req.params;
+      const { rol_code } = req.body || {};
 
       // Check ownership or admin role
       const comment = await CommentService.getById(Number(code));
@@ -205,9 +205,8 @@ class CommentHandler {
    */
   async reply(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { code } = req.params;
+      const { code, dni } = req.params;
       const { message, content_type = "text", url, file_code } = req.body;
-      const { dni } = req.user;
 
       // Get commenter details
       const commenter = await Person.query()

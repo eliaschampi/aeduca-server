@@ -326,7 +326,7 @@ class FileHandler {
 
       // Update database
       await storeWithTransaction(
-        { code: +code, parent_path: "/trash/" },
+        { code: +code, name: file.name, parent_path: "/trash/" },
         () => ({ old_child_path: "", new_child_path: "" }),
         async () => true
       );

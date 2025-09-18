@@ -112,10 +112,10 @@ class CommentService {
   async getCommentCount(post_code: number): Promise<number> {
     const result = await CommentModel.query()
       .where("post_code", post_code)
-      .count()
+      .count("* as count")
       .first();
 
-    return parseInt(result?.$parseDatabaseJson?.count || "0");
+    return parseInt(String((result as any)?.count || "0"));
   }
 
   /**
@@ -124,10 +124,10 @@ class CommentService {
   async getReplyCount(commentCode: number): Promise<number> {
     const result = await CommentModel.query()
       .where("reply_to_code", commentCode)
-      .count()
+      .count("* as count")
       .first();
 
-    return parseInt(result?.$parseDatabaseJson?.count || "0");
+    return parseInt(String((result as any)?.count || "0"));
   }
 
   /**
@@ -146,8 +146,8 @@ class CommentService {
           attached = {
             code: file.code,
             name: file.name,
-            type: file.type,
-            size: file.size,
+            type: file.type || "otr",
+            size: file.size || 0,
             dni: file.dni
           };
         }
@@ -236,8 +236,8 @@ class CommentService {
       query = query.where("created_at", "<=", endDate);
     }
 
-    const result = await query.count().first();
-    return parseInt(result?.$parseDatabaseJson?.count || "0");
+    const result = await query.count("* as count").first();
+    return parseInt(String((result as any)?.count || "0"));
   }
 }
 
