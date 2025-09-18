@@ -6,40 +6,22 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - PORT=3000
-      - CLIURL=http://localhost:5173   # ajusta al frontend real
-      - API=/api/v1
-      - DB_HOST=aeduca-postgres
-      - DB_PORT=5432
-      - DB_NAME=aeduca
-      - DB_USER=elias
-      - DB_PASSWORD=7532
-      - STORAGE=../drive
+      - PORT=${PORT}
+      - CLIURL=${CLIURL}   # ajusta al frontend real
+      - API=${API}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - STORAGE=${STORAGE}
     volumes:
       - .:/app              # montar código local (hot reload)
       - /app/node_modules   # volumen anónimo para deps (no se pisan)
       - ./drive:/app/drive  # montar directorio de archivos
-    depends_on:
-      - aeduca-postgres
     networks:
       - app-network
       - aeduca-main_default
-
-  aeduca-postgres:
-    container_name: aeduca-postgres
-    image: postgres:15
-    restart: always
-    environment:
-      - POSTGRES_DB=aeduca
-      - POSTGRES_USER=elias
-      - POSTGRES_PASSWORD=7532
-    volumes:
-      - ./pgdata:/var/lib/postgresql/data
-      - ./migrations:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
-    networks:
-      - app-network
 
 networks:
   app-network:
