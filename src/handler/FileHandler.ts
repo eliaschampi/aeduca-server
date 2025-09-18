@@ -442,9 +442,6 @@ class FileHandler {
         return;
       }
 
-      // Set CORS headers
-      this.setCorsHeaders(res);
-
       const stat = fs.statSync(fullPath);
       const fileSize = stat.size;
       const extension = path.extname(entity.name).toLowerCase().substring(1);
@@ -519,9 +516,6 @@ class FileHandler {
         return;
       }
 
-      // Set CORS headers
-      this.setCorsHeaders(res);
-
       const stat = fs.statSync(fullPath);
       const fileSize = stat.size;
       const extension = path.extname(entity.name).toLowerCase().substring(1);
@@ -537,15 +531,6 @@ class FileHandler {
       console.error("Error serving image:", error);
       res.sendStatus(404);
     }
-  }
-
-  /**
-   * Set CORS headers for media serving
-   */
-  private setCorsHeaders(res: Response): void {
-    const origin = process.env.CLIURL || "*";
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Access-Control-Allow-Credentials", "true");
   }
 
   /**
