@@ -75,6 +75,5 @@ docker compose down
 ```bash
 docker rmi aulaserver
 ```
-#### Do not forget to delete the `mongodata` directory if you want to start with a fresh database.
 Thanks
 

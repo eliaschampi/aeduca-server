@@ -4,7 +4,6 @@ node_modules
 .http
 .rest
 package-lock.json
-mongodata
 *.rest
 *.http
 *.sql
