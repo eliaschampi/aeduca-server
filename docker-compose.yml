@@ -5,6 +5,8 @@ services:
     image: aulaserver
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     environment:
       - PORT=${PORT}
       - CLIURL=${CLIURL}   # ajusta al frontend real

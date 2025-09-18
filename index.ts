@@ -15,6 +15,13 @@ import routes from "./src/routes";
 // Load environment variables
 config();
 
+console.log('Loaded env vars:');
+console.log('PORT:', process.env.PORT);
+console.log('DB_HOST:', process.env.DB_HOST);
+console.log('DB_USER:', process.env.DB_USER);
+console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? '***' : 'not set');
+console.log('JWT_KEY:', process.env.JWT_KEY ? 'set' : 'not set');
+
 const app = express();
 
 const port = parseInt(process.env.PORT || "3000");
