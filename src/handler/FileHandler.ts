@@ -206,7 +206,7 @@ class FileHandler {
 
       // Determine file type based on extension
       const extension = path.extname(entityData.name).toLowerCase();
-      const fileType = this.getFileType(extension);
+      const fileType = FileHandler.getFileType(extension);
       entityData.type = fileType;
 
       // Upload file
@@ -495,7 +495,7 @@ class FileHandler {
   /**
    * Helper: Determine file type from extension
    */
-  private getFileType(extension: string): FileEntity["type"] {
+  private static getFileType(extension: string): FileEntity["type"] {
     const ext = extension.toLowerCase().substring(1); // Remove the dot
 
     const imageExts = ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"];
