@@ -9,6 +9,7 @@ import {
   byCode,
   byUser,
   byTag,
+  updateTag as updateTagService,
   destroy,
   recentOrHeavy,
   searchQuery,
@@ -221,7 +222,20 @@ class FileHandler {
       const value = await store(uploadResult.entity!);
 
       res.status(201).json({
-        message: "File uploaded successfully",
+        message: "Archivo actualizado correctamente",
+        data: value
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateTag(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { code, tag } = req.body;
+      const value = updateTagService(code, tag);
+      res.status(201).json({
+        message: "Etiqueta modificada",
         data: value
       });
     } catch (error) {

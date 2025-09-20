@@ -52,6 +52,12 @@ export const byTag = async (dni: string, tag: string): Promise<File[]> => {
     .orderBy("created_at", "DESC");
 };
 
+export const updateTag = async (code: number, tag: string): Promise<File> => {
+  return await File.query().findById(code).patch({
+    tag
+  });
+};
+
 export const sumSize = async (dni: string): Promise<File | undefined> => {
   return await File.query().select(raw("sum(file.size) as sum")).findOne({
     dni

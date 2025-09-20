@@ -17,6 +17,7 @@ router.get("/:code", FileHandler.fetchByCode);
 router.post("/directory", FileHandler.createDir);
 router.post("/upload", FileHandler.storeFile);
 router.put("/update", FileHandler.update);
+router.put("/tag", FileHandler.updateTag);
 router.delete("/:code", FileHandler.deleteFile);
 
 // File browsing
