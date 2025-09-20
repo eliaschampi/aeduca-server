@@ -4,7 +4,6 @@ import { Router } from "express";
 import activity from "./activity";
 import attendance from "./attendance";
 import auth from "./auth";
-import calification from "./calification";
 import comment from "./comment";
 import content from "./content";
 import file from "./file";
@@ -19,7 +18,6 @@ import profile from "./profile";
 import register from "./register";
 import response from "./response";
 import schedule from "./schedule";
-import score from "./score";
 import section from "./section";
 
 const router = Router();
@@ -37,7 +35,6 @@ router.get("/health", (req, res) => {
 router.use("/activity", activity);
 router.use("/attendance", attendance);
 router.use("/auth", auth);
-router.use("/calification", calification);
 router.use("/comment", comment);
 router.use("/content", content);
 router.use("/file", file);
@@ -52,7 +49,6 @@ router.use("/profile", profile);
 router.use("/register", register);
 router.use("/response", response);
 router.use("/schedule", schedule);
-router.use("/score", score);
 router.use("/section", section);
 
 // 404 handler for unknown API routes
