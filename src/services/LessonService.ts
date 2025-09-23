@@ -1,12 +1,10 @@
 import { QueryBuilder, PartialModelGraph } from "objection";
 import Lesson from "../model/Lesson";
-import { update as updateCali } from "./CalificationService";
 import { update as updateLesson } from "./ContentService";
 import { update as updateActivity } from "./ActivityService";
 import { IActivity } from "../model/Activity";
 type LType = {
   code: number;
-  calification?: object;
   content?: object;
   activity?: IActivity;
 };
@@ -37,10 +35,6 @@ export async function update(lesson: LType, code: number): Promise<void> {
     .patch({
       ...lesson
     });
-  if (lesson.calification) {
-    await updateCali(code, lesson.calification);
-    return;
-  }
   if (lesson.content) {
     await updateLesson(code, lesson.content);
     return;

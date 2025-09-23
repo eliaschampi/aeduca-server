@@ -1,5 +1,5 @@
 import Register from "../model/Register";
-import { QueryBuilder, raw } from "objection";
+import { QueryBuilder } from "objection";
 import { full } from "../decorators/Decorators";
 
 export const fetchByIn = (codes: string[], section_code: string[]) => {
@@ -7,37 +7,6 @@ export const fetchByIn = (codes: string[], section_code: string[]) => {
     .select("code")
     .whereIn("code", codes)
     .whereIn("section_code", section_code);
-};
-
-export const fetchScoreReport = (
-  lesson_code: number,
-  section_code: string,
-  skip: number
-) => {
-  return Register.query()
-    .select(
-      "person.dni",
-      "person.name",
-      "person.lastname",
-      "profile.image",
-      "register.code",
-      "register.section_code",
-      raw(
-        "json_build_object('score', score.score, 'obs', score.obs, 'keys', score.keys)"
-      ).as("score")
-    )
-    .leftJoin("score", function () {
-      this.on("register.code", "score.register_code").andOnVal(
-        "score.lesson_code",
-        lesson_code
-      );
-    })
-    .join("person", "register.student_dni", "person.dni")
-    .join("profile", "person.dni", "profile.person_dni")
-    .where("register.section_code", section_code)
-    .orderByRaw("score.score DESC NULLS LAST")
-    .offset(skip)
-    .limit(15);
 };
 
 export const fetchActiveRegister = async (dni: string): Promise<Register | null> => {

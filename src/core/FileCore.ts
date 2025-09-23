@@ -120,8 +120,7 @@ class FileCore {
       if (!fileNameRegex.test(entity.name)) {
         return {
           success: false,
-          message:
-            "Invalid file name. Use only alphanumeric characters, spaces, dots, hyphens, and underscores."
+          message: "Nombre de archivo no valido"
         };
       }
 

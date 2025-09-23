@@ -24,20 +24,3 @@ export const countBySection = async (req: Request, res: Response, next: NextFunc
     next(error);
   }
 };
-
-export const fetchScoreReport = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const values = await service.fetchScoreReport(
-      +req.params.lesson_code,
-      req.params.section_code,
-      +req.params.skip
-    );
-    return res.status(200).send({ values });
-  } catch (error) {
-    next(error);
-  }
-};
