@@ -22,11 +22,11 @@ services:
       - /app/node_modules 
       - ../drive:/drive
     networks:
-      - app-network
+      - aeduca-main_default
       - main_default
 
 networks:
-  app-network:
+  aeduca-main_default:
     driver: bridge
   main_default:
     external: true
