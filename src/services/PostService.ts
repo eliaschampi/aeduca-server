@@ -218,15 +218,17 @@ class PostService {
       throw new Error("Post not found");
     }
 
-    const commentCount = await CommentModel.query()
+    const commentCountResult = await CommentModel.query()
       .where("post_code", postCode)
-      .count()
+      .count("code as count")
       .first();
+
+    const commentsCount = Number((commentCountResult as any)?.count ?? 0);
 
     return {
       likes_count: post.likes?.length || 0,
       saves_count: post.savelist?.length || 0,
-      comments_count: parseInt(commentCount?.$parseDatabaseJson?.count || "0")
+      comments_count: commentsCount
     };
   }
 
@@ -245,8 +247,8 @@ class PostService {
         files = fileRecords.map((f) => ({
           code: f.code,
           name: f.name,
-          type: f.type,
-          size: f.size,
+          type: f.type ?? "otr",
+          size: f.size ?? 0,
           dni: f.dni
         }));
       }

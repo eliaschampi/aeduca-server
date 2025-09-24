@@ -52,7 +52,7 @@ class CommentService {
   ): Promise<CommentModel[]> {
     return await CommentModel.query()
       .where("post_code", post_code)
-      .whereNull("reply_to_id") // Only get top-level comments
+      .whereNull("reply_to_code") // Only get top-level comments
       .withGraphFetched("replies(orderByCreated)")
       .modifiers({
         orderByCreated(builder) {
