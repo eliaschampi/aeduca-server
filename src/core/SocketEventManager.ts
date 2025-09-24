@@ -50,18 +50,21 @@ export function connection(io: IO): void {
       logout(dni || socket.data.dni, cb);
     });
 
-    socket.on("message:typing", (room: string, val: boolean) => {
-      socket.to(`room_${room}`).emit("message:typing", room, val);
-    });
-
     socket.on("comment:typing", (postId: string, val: boolean) => {
       socket.broadcast.emit("comment:typing", postId, val);
     });
 
-    socket.on("like:toggle", (postCode: string, dni: string) => {
-      PostService.toggleLike(Number(postCode), dni).then(() => {
+    socket.on("like:toggle", async (postCode: string, dni: string) => {
+      try {
+        await PostService.toggleLike(Number(postCode), dni);
         socket.broadcast.emit("like:toggle", postCode, dni);
-      });
+      } catch (error) {
+        socket.emit("error", {
+          event: "like:toggle",
+          postCode,
+          message: (error as Error).message
+        });
+      }
     });
 
     socket.on("disconnect", () => {
