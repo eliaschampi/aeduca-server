@@ -33,6 +33,7 @@ router.post("/:code/trash", FileHandler.moveToTrash);
 router.delete("/trash/:dni", FileHandler.cleanTrash);
 
 // Sharing
-router.get("/shared/:dni/:section_code", FileHandler.fetchShared);
+router.get("/shared-with-me/:dni/:section_code", FileHandler.fetchSharedWithMe);
+router.get("/shared-by-me/:dni", FileHandler.fetchSharedByMe);
 
 export default router;

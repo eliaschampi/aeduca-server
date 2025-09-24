@@ -47,7 +47,7 @@ class PostHandler {
 
       res.status(201).json({
         message: "Post created successfully",
-        data: post
+        value: post
       });
     } catch (error) {
       next(error);
@@ -73,7 +73,7 @@ class PostHandler {
       );
 
       res.status(200).json({
-        data: posts,
+        values: posts,
         pagination: {
           page: Number(page),
           limit: Number(limit),
@@ -100,7 +100,7 @@ class PostHandler {
         return;
       }
 
-      res.status(200).json({ data: post });
+      res.status(200).json({ value: post });
     } catch (error) {
       next(error);
     }
@@ -120,7 +120,7 @@ class PostHandler {
       const posts = await PostService.getUserPosts(dni, Number(limit), offset);
 
       res.status(200).json({
-        data: posts,
+        values: posts,
         pagination: {
           page: Number(page),
           limit: Number(limit)
@@ -145,7 +145,7 @@ class PostHandler {
       const posts = await PostService.getSavedPosts(dni, Number(limit), offset);
 
       res.status(200).json({
-        data: posts,
+        values: posts,
         pagination: {
           page: Number(page),
           limit: Number(limit)
@@ -187,7 +187,7 @@ class PostHandler {
 
       res.status(200).json({
         message: "Post updated successfully",
-        data: updatedPost
+        value: updatedPost
       });
     } catch (error) {
       next(error);
@@ -236,7 +236,7 @@ class PostHandler {
 
       res.status(200).json({
         message: result.liked ? "Post liked" : "Post unliked",
-        data: result
+        value: result
       });
     } catch (error) {
       next(error);
@@ -256,7 +256,7 @@ class PostHandler {
 
       res.status(200).json({
         message: result.saved ? "Post saved" : "Post unsaved",
-        data: result
+        value: result
       });
     } catch (error) {
       next(error);
@@ -282,7 +282,7 @@ class PostHandler {
 
       res.status(200).json({
         message: `Post ${approved ? "approved" : "rejected"}`,
-        data: post
+        value: post
       });
     } catch (error) {
       next(error);
@@ -311,7 +311,7 @@ class PostHandler {
       });
 
       res.status(200).json({
-        data: posts,
+        values: posts,
         pagination: {
           page: Number(page),
           limit: Number(limit),
@@ -333,7 +333,7 @@ class PostHandler {
 
       const stats = await PostService.getStats(Number(code));
 
-      res.status(200).json({ data: stats });
+      res.status(200).json({ value: stats });
     } catch (error) {
       next(error);
     }

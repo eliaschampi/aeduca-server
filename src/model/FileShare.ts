@@ -1,6 +1,11 @@
 import { Model } from "objection";
 
 class FileShare extends Model {
+  code!: number;
+  file_code!: number;
+  message!: string;
+  receiver!: string;
+
   static get tableName(): string {
     return "fileshare";
   }
@@ -11,6 +16,7 @@ class FileShare extends Model {
 }
 
 export type IFileShare = {
+  code?: number;
   file_code: number;
   message: string;
   receiver: string;

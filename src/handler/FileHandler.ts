@@ -14,6 +14,7 @@ import {
   recentOrHeavy,
   searchQuery,
   shareds,
+  sharedsByMe,
   store,
   storeWithTransaction,
   sumSize,
@@ -40,7 +41,7 @@ class FileHandler {
         return;
       }
 
-      res.status(200).json({ data: value });
+      res.status(200).json({ value });
     } catch (error) {
       next(error);
     }
@@ -54,7 +55,7 @@ class FileHandler {
     try {
       const { dni, query } = req.params;
       const values = await searchQuery(dni, query);
-      res.status(200).json({ data: values });
+      res.status(200).json({ values });
     } catch (error) {
       next(error);
     }
@@ -72,7 +73,7 @@ class FileHandler {
       await FileCore.ensureUserDirectory(dni);
 
       const values = await byUser(dni, parent_code, onlydir === "true");
-      res.status(200).json({ data: values });
+      res.status(200).json({ values });
     } catch (error) {
       next(error);
     }
@@ -90,7 +91,7 @@ class FileHandler {
     try {
       const { dni, mode } = req.params;
       const values = await recentOrHeavy(dni, mode);
-      res.status(200).json({ data: values });
+      res.status(200).json({ values });
     } catch (error) {
       next(error);
     }
@@ -104,7 +105,7 @@ class FileHandler {
     try {
       const { dni } = req.params;
       const values = await trashes(dni);
-      res.status(200).json({ data: values });
+      res.status(200).json({ values });
     } catch (error) {
       next(error);
     }
@@ -118,7 +119,7 @@ class FileHandler {
     try {
       const { dni, tag } = req.params;
       const values = await byTag(dni, tag);
-      res.status(200).json({ data: values });
+      res.status(200).json({ values });
     } catch (error) {
       next(error);
     }
@@ -149,14 +150,32 @@ class FileHandler {
   }
 
   /**
-   * Get shared files
-   * GET /api/v1/file/shared/:dni/:section_code
+   * Get files shared with me
+   * GET /api/v1/file/shared-with-me/:dni/:section_code
    */
-  async fetchShared(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async fetchSharedWithMe(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const { dni, section_code } = req.params;
       const values = await shareds(dni, section_code);
-      res.status(200).json({ data: values });
+      res.status(200).json({ values });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get files shared by me
+   * GET /api/v1/file/shared-by-me/:dni
+   */
+  async fetchSharedByMe(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { dni } = req.params;
+      const values = await sharedsByMe(dni);
+      res.status(200).json({ values });
     } catch (error) {
       next(error);
     }
@@ -181,7 +200,7 @@ class FileHandler {
 
       res.status(201).json({
         message: "Directory created successfully",
-        data: value
+        value
       });
     } catch (error) {
       next(error);
@@ -223,7 +242,7 @@ class FileHandler {
 
       res.status(201).json({
         message: "Archivo actualizado correctamente",
-        data: value
+        value
       });
     } catch (error) {
       next(error);
@@ -236,7 +255,7 @@ class FileHandler {
       const value = updateTagService(code, tag);
       res.status(201).json({
         message: "Etiqueta modificada",
-        data: value
+        value
       });
     } catch (error) {
       next(error);

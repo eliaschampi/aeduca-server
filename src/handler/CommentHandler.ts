@@ -53,7 +53,7 @@ class CommentHandler {
 
       res.status(201).json({
         message: "Comment created successfully",
-        data: comment
+        value: comment
       });
     } catch (error) {
       next(error);
@@ -79,7 +79,7 @@ class CommentHandler {
       const count = await CommentService.getCommentCount(Number(post_code));
 
       res.status(200).json({
-        data: comments,
+        values: comments,
         pagination: {
           page: Number(page),
           limit: Number(limit),
@@ -106,7 +106,7 @@ class CommentHandler {
         return;
       }
 
-      res.status(200).json({ data: comment });
+      res.status(200).json({ value: comment });
     } catch (error) {
       next(error);
     }
@@ -126,7 +126,7 @@ class CommentHandler {
       const comments = await CommentService.getUserComments(dni, Number(limit), offset);
 
       res.status(200).json({
-        data: comments,
+        values: comments,
         pagination: {
           page: Number(page),
           limit: Number(limit)
@@ -162,7 +162,7 @@ class CommentHandler {
 
       res.status(200).json({
         message: "Comment updated successfully",
-        data: updatedComment
+        value: updatedComment
       });
     } catch (error) {
       next(error);
@@ -238,7 +238,7 @@ class CommentHandler {
 
       res.status(201).json({
         message: "Reply created successfully",
-        data: reply
+        value: reply
       });
     } catch (error) {
       next(error);
@@ -260,7 +260,7 @@ class CommentHandler {
         return;
       }
 
-      res.status(200).json({ data: thread });
+      res.status(200).json({ value: thread });
     } catch (error) {
       next(error);
     }

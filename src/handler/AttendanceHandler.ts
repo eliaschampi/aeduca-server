@@ -99,7 +99,7 @@ export const fetchAttendanceByEntity = async (
       Number(priority)
     );
 
-    return res.status(200).json({ data: attendances });
+    return res.status(200).json({ values: attendances });
   } catch (error) {
     next(error);
   }

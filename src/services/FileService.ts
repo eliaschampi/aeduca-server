@@ -71,7 +71,18 @@ export const shareds = async (dni: string, section_code = ""): Promise<File[]> =
       Person.query()
         .where("dni", ref("file.dni"))
         .select(raw("concat(name,' ', lastname)"))
-        .as("sh_entity")
+        .as("sh_entity"),
+      raw(`(
+        SELECT json_build_object(
+          'message', fs.message,
+          'share_code', fs.code,
+          'receiver', fs.receiver
+        )
+        FROM fileshare fs 
+        WHERE fs.file_code = file.code 
+        AND fs.receiver IN ('${dni}','${section_code}','all')
+        LIMIT 1
+      ) as share_info`)
     ])
     .where("dni", "!=", dni)
     .whereExists(
@@ -79,7 +90,28 @@ export const shareds = async (dni: string, section_code = ""): Promise<File[]> =
         `file_code = file.code and receiver in ('${dni}','${section_code}','all')`
       )
     )
-    .orderBy("created_at", "DESC");
+    .orderBy("file.created_at", "DESC");
+};
+
+export const sharedsByMe = async (dni: string): Promise<File[]> => {
+  return await File.query()
+    .select([
+      "file.*",
+      raw(`(
+        SELECT json_agg(
+          json_build_object(
+            'receiver', fs.receiver,
+            'message', fs.message,
+            'share_code', fs.code
+          )
+        )
+        FROM fileshare fs 
+        WHERE fs.file_code = file.code
+      ) as share_details`)
+    ])
+    .where("dni", dni)
+    .whereExists(FileShare.query().whereRaw("file_code = file.code"))
+    .orderBy("file.created_at", "DESC");
 };
 
 export const store = async (file: Record<string, unknown>): Promise<File> => {
