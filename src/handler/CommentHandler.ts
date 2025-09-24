@@ -23,6 +23,9 @@ class CommentHandler {
       } = req.body;
       const { dni } = req.params;
 
+      const postCodeNumber = Number(post_code);
+      const replyToCodeNumber = reply_to_code ? Number(reply_to_code) : undefined;
+
       // Get commenter details
       const commenter = await Person.query()
         .select("name", "lastname", "profile.image")
@@ -36,12 +39,12 @@ class CommentHandler {
       }
 
       const commentData: Partial<IComment> = {
-        post_code,
+        post_code: postCodeNumber,
         from_dni: dni,
         from_name: `${commenter.name} ${commenter.lastname}`,
         from_image: commenter.image,
         message,
-        reply_to_code,
+        reply_to_code: replyToCodeNumber,
         content_type,
         url
       };
@@ -229,12 +232,11 @@ class CommentHandler {
         url
       };
 
-      const reply = file_code
-        ? await CommentService.createWithAttachment(
-            { ...replyData, reply_to_code: Number(code) },
-            file_code
-          )
-        : await CommentService.replyToComment(Number(code), replyData);
+      const reply = await CommentService.replyToComment(
+        Number(code),
+        replyData,
+        file_code
+      );
 
       res.status(201).json({
         message: "Reply created successfully",

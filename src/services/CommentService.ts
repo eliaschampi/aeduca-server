@@ -14,9 +14,10 @@ class CommentService {
   /**
    * Create a new comment
    */
-  async create(commentData: Partial<IComment>): Promise<CommentModel> {
+  async create(commentData: Partial<IComment>, trx?: Transaction): Promise<CommentModel> {
     // Verify post exists
-    const post = await PostModel.query().findById(commentData.post_code!);
+    const postQuery = trx ? PostModel.query(trx) : PostModel.query();
+    const post = await postQuery.findById(commentData.post_code!);
     if (!post) {
       throw new Error("Post not found");
     }
@@ -25,7 +26,9 @@ class CommentService {
       throw new Error("Comments are disabled for this post");
     }
 
-    return await CommentModel.query().insert(commentData);
+    const commentQuery = trx ? CommentModel.query(trx) : CommentModel.query();
+
+    return await commentQuery.insert(commentData);
   }
 
   /**
@@ -52,7 +55,7 @@ class CommentService {
   ): Promise<CommentModel[]> {
     return await CommentModel.query()
       .where("post_code", post_code)
-      .whereNull("reply_to_id") // Only get top-level comments
+      .whereNull("reply_to_code") // Only get top-level comments
       .withGraphFetched("replies(orderByCreated)")
       .modifiers({
         orderByCreated(builder) {
@@ -137,6 +140,10 @@ class CommentService {
     commentData: Partial<IComment>,
     fileCode?: number
   ): Promise<CommentModel> {
+    if (!commentData.post_code) {
+      throw new Error("post_code is required to attach a file to a comment");
+    }
+
     return await CommentModel.transaction(async (trx: Transaction) => {
       // Get file details if provided
       let attached: ICommentAttachment | undefined;
@@ -153,13 +160,13 @@ class CommentService {
         }
       }
 
-      // Create comment with attachment
-      const comment = await CommentModel.query(trx).insert({
-        ...commentData,
-        attached
-      });
-
-      return comment;
+      return await this.create(
+        {
+          ...commentData,
+          attached
+        },
+        trx
+      );
     });
   }
 
@@ -193,7 +200,8 @@ class CommentService {
    */
   async replyToComment(
     comment_code: number,
-    replyData: Partial<IComment>
+    replyData: Partial<IComment>,
+    fileCode?: number
   ): Promise<CommentModel> {
     // Get original comment to verify it exists and get post_id
     const originalComment = await CommentModel.query().findById(comment_code);
@@ -202,11 +210,17 @@ class CommentService {
     }
 
     // Create reply with same post_id as original comment
-    return await this.create({
+    const replyPayload = {
       ...replyData,
       post_code: originalComment.post_code,
       reply_to_code: comment_code
-    });
+    };
+
+    if (fileCode) {
+      return await this.createWithAttachment(replyPayload, fileCode);
+    }
+
+    return await this.create(replyPayload);
   }
 
   /**
