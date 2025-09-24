@@ -152,7 +152,7 @@ class PostService {
     const post = await PostModel.query().findById(postCode);
 
     if (!post) {
-      throw new Error("Post not found");
+      throw new Error("Post no encontrado");
     }
 
     const likes = post.toggleLike(dni);
@@ -171,7 +171,7 @@ class PostService {
     const post = await PostModel.query().findById(postCode);
 
     if (!post) {
-      throw new Error("Post not found");
+      throw new Error("Post no encontrado");
     }
 
     const savelist = post.toggleSave(dni);

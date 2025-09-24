@@ -52,7 +52,7 @@ export const byTag = async (dni: string, tag: string): Promise<File[]> => {
     .orderBy("created_at", "DESC");
 };
 
-export const updateTag = async (code: number, tag: string): Promise<File> => {
+export const updateTag = async (code: number, tag: string): Promise<number> => {
   return await File.query().findById(code).patch({
     tag
   });
@@ -139,7 +139,12 @@ const updateParentPath = async (
 };
 
 export const storeWithTransaction = async (
-  file_request: { code: number; name: string; parent_path: string | null },
+  file_request: {
+    code: number;
+    name: string;
+    parent_path: string | null;
+    parent_code?: number | string;
+  },
   joinedChildPath: Callvar,
   renameOrMove: Callvar
 ): Promise<boolean> => {
@@ -180,7 +185,6 @@ export const deleteTrash = async (
   destroyTrashFiles: Callvar
 ): Promise<boolean> => {
   return await File.transaction(async (tsx) => {
-    // Properly reference the "file" table using Objection's query builder with the current transaction
     await File.query(tsx).where("dni", dni).where("parent_path", "/trash/").delete();
 
     await destroyTrashFiles(dni);

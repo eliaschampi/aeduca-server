@@ -19,11 +19,11 @@ class CommentService {
     const postQuery = trx ? PostModel.query(trx) : PostModel.query();
     const post = await postQuery.findById(commentData.post_code!);
     if (!post) {
-      throw new Error("Post not found");
+      throw new Error("Post no encontrado");
     }
 
     if (!post.commentable) {
-      throw new Error("Comments are disabled for this post");
+      throw new Error("Comentarios deshabilitados para este post");
     }
 
     const commentQuery = trx ? CommentModel.query(trx) : CommentModel.query();
@@ -141,7 +141,7 @@ class CommentService {
     fileCode?: number
   ): Promise<CommentModel> {
     if (!commentData.post_code) {
-      throw new Error("post_code is required to attach a file to a comment");
+      throw new Error("post_code es requerido para adjuntar un archivo a un comentario");
     }
 
     return await CommentModel.transaction(async (trx: Transaction) => {
@@ -206,7 +206,7 @@ class CommentService {
     // Get original comment to verify it exists and get post_id
     const originalComment = await CommentModel.query().findById(comment_code);
     if (!originalComment) {
-      throw new Error("Original comment not found");
+      throw new Error("Comentario original no encontrado");
     }
 
     // Create reply with same post_id as original comment

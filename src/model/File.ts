@@ -33,6 +33,7 @@ class File extends Model {
   parent_path?: string | null;
   parent_code?: number;
   size?: number;
+  tag?: string;
   type?: "dir" | "doc" | "vid" | "img" | "aud" | "zip" | "otr";
   full_route?: string;
   created_at?: string;

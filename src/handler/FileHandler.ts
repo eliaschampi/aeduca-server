@@ -37,7 +37,7 @@ class FileHandler {
       const value = await byCode(parseInt(code));
 
       if (!value) {
-        res.status(404).json({ message: "File not found" });
+        res.status(404).json({ message: "Archivo no encontrado" });
         return;
       }
 
@@ -199,7 +199,7 @@ class FileHandler {
       const value = await store(directory);
 
       res.status(201).json({
-        message: "Directory created successfully",
+        message: "Directorio creado exitosamente",
         value
       });
     } catch (error) {
@@ -214,7 +214,7 @@ class FileHandler {
   async storeFile(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!req.files || !req.files.file) {
-        res.status(400).json({ message: "No file provided" });
+        res.status(400).json({ message: "No se proporciono un archivo" });
         return;
       }
 
@@ -241,7 +241,7 @@ class FileHandler {
       const value = await store(uploadResult.entity!);
 
       res.status(201).json({
-        message: "Archivo actualizado correctamente",
+        message: "Archivo subido exitosamente",
         value
       });
     } catch (error) {
@@ -268,12 +268,12 @@ class FileHandler {
    */
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { code, name, parent_path } = req.body;
+      const { code, name, parent_path, parent_code } = req.body;
 
       // Get existing file
       const existingFile = await byCode(code);
       if (!existingFile) {
-        res.status(404).json({ message: "File not found" });
+        res.status(404).json({ message: "Archivo no encontrado" });
         return;
       }
 
@@ -321,15 +321,15 @@ class FileHandler {
       };
 
       await storeWithTransaction(
-        { code, name: newName, parent_path: newParentPath },
+        { code, name: newName, parent_path: newParentPath, parent_code },
         joinedChildPath,
         async () => true // FileCore already handled the rename
       );
 
       const message =
         isRestoreOperation && isFromTrash
-          ? "File restored successfully"
-          : "File updated successfully";
+          ? "Archivo restaurado exitosamente"
+          : "Archivo actualizado exitosamente";
       res.status(200).json({ message });
     } catch (error) {
       next(error);
@@ -352,7 +352,7 @@ class FileHandler {
         }
       });
 
-      res.status(200).json({ message: "File deleted successfully" });
+      res.status(200).json({ message: "Archivo eliminado exitosamente" });
     } catch (error) {
       next(error);
     }
@@ -369,7 +369,7 @@ class FileHandler {
       // Get file details
       const file = await byCode(+code);
       if (!file) {
-        res.status(404).json({ message: "File not found" });
+        res.status(404).json({ message: "Archivo no encontrado" });
         return;
       }
 
@@ -387,7 +387,7 @@ class FileHandler {
         async () => true
       );
 
-      res.status(200).json({ message: "File moved to trash" });
+      res.status(200).json({ message: "Archivo movido a la papelera exitosamente" });
     } catch (error) {
       next(error);
     }
@@ -409,7 +409,7 @@ class FileHandler {
         }
       });
 
-      res.status(200).json({ message: "Trash emptied successfully" });
+      res.status(200).json({ message: "Papelera vaciada exitosamente" });
     } catch (error) {
       next(error);
     }
@@ -425,7 +425,7 @@ class FileHandler {
 
       const file = await byCode(+code);
       if (!file) {
-        res.status(404).json({ message: "File not found" });
+        res.status(404).json({ message: "Archivo no encontrado" });
         return;
       }
 
@@ -433,7 +433,7 @@ class FileHandler {
       const fullPath = FileCore.getFullPath(entity);
 
       if (!FileCore.existsSync(fullPath)) {
-        res.status(404).json({ message: "File not found on filesystem" });
+        res.status(404).json({ message: "Archivo no encontrado en el sistema" });
         return;
       }
 
