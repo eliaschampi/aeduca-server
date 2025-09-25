@@ -95,6 +95,10 @@ class PostModel extends Model {
     };
   }
 
+  static get jsonAttributes() {
+    return ['files'];
+  }
+
   static get relationMappings(): any {
     return {
       creator: {
