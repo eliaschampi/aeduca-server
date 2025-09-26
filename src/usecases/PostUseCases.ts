@@ -44,7 +44,6 @@ export type PostUpdateInput = {
 export type PostDeleteInput = {
   dni: string;
   code: number;
-  rol_code?: string;
 };
 
 export type PostToggleReactionInput = {
@@ -78,7 +77,6 @@ export type CommentUpdateInput = {
 export type CommentDeleteInput = {
   dni: string;
   code: number;
-  rol_code?: string;
 };
 
 export type CommentReplyInput = {
@@ -145,17 +143,14 @@ export async function updatePost({ dni, code, payload }: PostUpdateInput) {
   return updated;
 }
 
-export async function deletePost({ dni, code, rol_code }: PostDeleteInput) {
+export async function deletePost({ dni, code }: PostDeleteInput) {
   const existing = await PostService.getById(code);
 
   if (!existing) {
     throw new Error("Post no encontrado");
   }
 
-  const isOwner = existing.creator_dni === dni;
-  const isAdmin = rol_code === "a";
-
-  if (!isOwner && !isAdmin) {
+  if (existing.creator_dni !== dni) {
     throw new Error("No autorizado para eliminar este post");
   }
 
@@ -249,13 +244,10 @@ export async function updateComment({ dni, code, message }: CommentUpdateInput) 
   return updated;
 }
 
-export async function deleteComment({ dni, code, rol_code }: CommentDeleteInput) {
+export async function deleteComment({ dni, code }: CommentDeleteInput) {
   const existing = ensureComment(await CommentService.getById(code));
 
-  const isOwner = existing.from_dni === dni;
-  const isAdmin = rol_code === "a";
-
-  if (!isOwner && !isAdmin) {
+  if (existing.from_dni !== dni) {
     throw new Error("No autorizado para eliminar este comentario");
   }
 

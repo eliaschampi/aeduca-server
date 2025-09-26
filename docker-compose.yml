@@ -22,8 +22,8 @@ services:
       - /app/node_modules 
       - ../drive:/drive
     networks:
-      - aeduca-main_default
+      - main_aeduca-network
 
 networks:
-  aeduca-main_default:
+  main_aeduca-network:
     external: true

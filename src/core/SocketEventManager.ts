@@ -119,9 +119,7 @@ export function connection(io: IO): void {
     );
 
     socket.on("post:delete", (payload, ack?: Ack) =>
-      handleWithAuth(socket, ack, (dni) =>
-        deletePostUseCase({ dni, code: payload.code, rol_code: payload.rol_code })
-      )
+      handleWithAuth(socket, ack, (dni) => deletePostUseCase({ dni, code: payload.code }))
     );
 
     socket.on("post:like", (payload, ack?: Ack) =>
@@ -148,7 +146,7 @@ export function connection(io: IO): void {
 
     socket.on("comment:delete", (payload, ack?: Ack) =>
       handleWithAuth(socket, ack, (dni) =>
-        deleteCommentUseCase({ dni, code: payload.code, rol_code: payload.rol_code })
+        deleteCommentUseCase({ dni, code: payload.code })
       )
     );
 

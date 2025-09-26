@@ -185,12 +185,10 @@ class PostHandler {
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code, dni } = req.params;
-      const { rol_code } = req.body || {};
 
       await deletePostUseCase({
         dni,
-        code: Number(code),
-        rol_code
+        code: Number(code)
       });
 
       res.status(200).json({ message: "Post deleted successfully" });
@@ -252,13 +250,7 @@ class PostHandler {
   async setApproval(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
-      const { approved, rol_code } = req.body;
-
-      // Check admin role
-      if (rol_code !== "a") {
-        res.status(403).json({ message: "Only administrators can approve posts" });
-        return;
-      }
+      const { approved } = req.body;
 
       const post = await setPostApprovalUseCase({ code: Number(code), approved });
 
@@ -266,56 +258,6 @@ class PostHandler {
         message: `Post ${approved ? "approved" : "rejected"}`,
         value: post
       });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Search posts
-   * GET /api/v1/post/search
-   */
-  async search(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { q, page = 1, limit = 20 } = req.query;
-
-      if (!q || typeof q !== "string") {
-        res.status(400).json({ message: "Search query is required" });
-        return;
-      }
-
-      const offset = (Number(page) - 1) * Number(limit);
-
-      const posts = await PostService.search(q, {
-        approved: true,
-        limit: Number(limit),
-        offset
-      });
-
-      res.status(200).json({
-        values: posts,
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          query: q
-        }
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Get post statistics
-   * GET /api/v1/post/:code/stats
-   */
-  async getStats(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { code } = req.params;
-
-      const stats = await PostService.getStats(Number(code));
-
-      res.status(200).json({ value: stats });
     } catch (error) {
       next(error);
     }

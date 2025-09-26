@@ -156,14 +156,11 @@ class CommentHandler {
    */
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { code } = req.params;
-      const { dni } = req.params;
-      const { rol_code } = req.body || {};
+      const { code, dni } = req.params;
 
       await deleteCommentUseCase({
         dni,
-        code: Number(code),
-        rol_code
+        code: Number(code)
       });
 
       res.status(200).json({ message: "Comment deleted successfully" });
