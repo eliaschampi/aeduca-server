@@ -79,27 +79,6 @@ class PostHandler {
   }
 
   /**
-   * Get single post by ID
-   * GET /api/v1/post/:code
-   */
-  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { code } = req.params;
-
-      const post = await PostService.getById(Number(code));
-
-      if (!post) {
-        res.status(404).json({ message: "Post not found" });
-        return;
-      }
-
-      res.status(200).json({ value: post });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
    * Get user's posts
    * GET /api/v1/post/user/:dni
    */

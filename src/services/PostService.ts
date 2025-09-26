@@ -182,60 +182,13 @@ class PostService {
     };
   }
 
-  /**
-   * Approve or reject a post
-   */
   async setApprovalStatus(postId: number, approved: boolean): Promise<PostModel> {
     return await PostModel.query().updateAndFetchById(postId, { approved });
   }
-
-  /**
-   * Search posts by content
-   */
-  async search(query: string, filters: PostFilters): Promise<PostModel[]> {
-    let searchQuery = PostModel.query()
-      .where("content", "ilike", `%${query}%`)
-      .orderBy("created_at", "desc");
-
-    if (filters.approved !== undefined) {
-      searchQuery = searchQuery.where("approved", filters.approved);
-    }
-
-    if (filters.limit) {
-      searchQuery = searchQuery.limit(filters.limit);
-    }
-
-    return await searchQuery;
-  }
-
-  /**
-   * Get post statistics
-   */
-  async getStats(postCode: number): Promise<any> {
-    const post = await PostModel.query().findById(postCode);
-
-    if (!post) {
-      throw new Error("Post not found");
-    }
-
-    const commentCountResult = await CommentModel.query()
-      .where("post_code", postCode)
-      .count("code as count")
-      .first();
-
-    const commentsCount = Number((commentCountResult as any)?.count ?? 0);
-
-    return {
-      likes_count: post.likes?.length || 0,
-      saves_count: post.savelist?.length || 0,
-      comments_count: commentsCount
-    };
-  }
-
   /**
    * Create post with transaction
    */
-  async createWithFiles(
+  async createWithTransaction(
     postData: Partial<IPost>,
     fileCodes: number[]
   ): Promise<PostModel> {

@@ -4,9 +4,6 @@ import verifyToken from "../middleware/verifyToken";
 
 const router = Router();
 
-// Public routes
-router.get("/:code", PostHandler.getById);
-
 // Protected routes
 router.use(verifyToken); // Apply auth middleware to all routes below
 

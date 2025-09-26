@@ -6,9 +6,6 @@ const router = Router();
 
 // Public routes
 router.get("/post/:post_code", CommentHandler.getPostComments);
-router.get("/post/:post_code/count", CommentHandler.getCommentCount);
-router.get("/:code", CommentHandler.getById);
-router.get("/:code/thread", CommentHandler.getThread);
 
 // Protected routes
 router.use(verifyToken); // Apply auth middleware to all routes below

@@ -110,30 +110,6 @@ class CommentService {
   }
 
   /**
-   * Get comment count for a post
-   */
-  async getCommentCount(post_code: number): Promise<number> {
-    const result = await CommentModel.query()
-      .where("post_code", post_code)
-      .count("* as count")
-      .first();
-
-    return parseInt(String((result as any)?.count || "0"));
-  }
-
-  /**
-   * Get reply count for a comment
-   */
-  async getReplyCount(commentCode: number): Promise<number> {
-    const result = await CommentModel.query()
-      .where("reply_to_code", commentCode)
-      .count("* as count")
-      .first();
-
-    return parseInt(String((result as any)?.count || "0"));
-  }
-
-  /**
    * Create comment with attachment
    */
   async createWithAttachment(
@@ -221,15 +197,6 @@ class CommentService {
     }
 
     return await this.create(replyPayload);
-  }
-
-  /**
-   * Get comment thread (comment with all its replies)
-   */
-  async getCommentThread(comment_code: number): Promise<CommentModel | undefined> {
-    return await CommentModel.query()
-      .findById(comment_code)
-      .withGraphFetched("replies.^"); // Recursive fetch all nested replies
   }
 
   /**

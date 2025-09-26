@@ -64,7 +64,9 @@ class CommentHandler {
           ? await CommentService.getPostComments(Number(post_code), Number(limit), offset)
           : await CommentService.getAllPostComments(Number(post_code));
 
-      const count = await CommentService.getCommentCount(Number(post_code));
+      // Calculate total count from the query result
+      const allComments = await CommentService.getAllPostComments(Number(post_code));
+      const count = allComments.length;
 
       res.status(200).json({
         values: comments,
@@ -74,27 +76,6 @@ class CommentHandler {
           total: count
         }
       });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Get single comment by ID
-   * GET /api/v1/comment/:code
-   */
-  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { code } = req.params;
-
-      const comment = await CommentService.getById(Number(code));
-
-      if (!comment) {
-        res.status(404).json({ message: "Comment not found" });
-        return;
-      }
-
-      res.status(200).json({ value: comment });
     } catch (error) {
       next(error);
     }
@@ -151,25 +132,6 @@ class CommentHandler {
   }
 
   /**
-   * Delete a comment
-   * DELETE /api/v1/comment/:code
-   */
-  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { code, dni } = req.params;
-
-      await deleteCommentUseCase({
-        dni,
-        code: Number(code)
-      });
-
-      res.status(200).json({ message: "Comment deleted successfully" });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
    * Reply to a comment
    * POST /api/v1/comment/:code/reply
    */
@@ -199,37 +161,19 @@ class CommentHandler {
   }
 
   /**
-   * Get comment thread
-   * GET /api/v1/comment/:code/thread
+   * Delete a comment
+   * DELETE /api/v1/comment/:code
    */
-  async getThread(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { code } = req.params;
+      const { code, dni } = req.params;
 
-      const thread = await CommentService.getCommentThread(Number(code));
+      await deleteCommentUseCase({
+        dni,
+        code: Number(code)
+      });
 
-      if (!thread) {
-        res.status(404).json({ message: "Comment not found" });
-        return;
-      }
-
-      res.status(200).json({ value: thread });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Get comment count for a post
-   * GET /api/v1/comment/post/:post_code/count
-   */
-  async getCommentCount(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { post_code } = req.params;
-
-      const count = await CommentService.getCommentCount(Number(post_code));
-
-      res.status(200).json({ count });
+      res.status(200).json({ message: "Comment deleted successfully" });
     } catch (error) {
       next(error);
     }

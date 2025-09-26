@@ -112,7 +112,7 @@ export async function createPost({ dni, payload }: PostCreateInput) {
 
   const post =
     payload.files && payload.files.length > 0
-      ? await PostService.createWithFiles(data, payload.files)
+      ? await PostService.createWithTransaction(data, payload.files)
       : await PostService.create(data);
 
   emitPostCreated(post);
