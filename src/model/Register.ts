@@ -3,6 +3,8 @@ import Person from "./Person";
 import Profile from "./Profile";
 
 class Register extends Model {
+  section_code?: string | null;
+
   static tableName = "register";
 
   static get idColumn(): string {

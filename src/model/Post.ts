@@ -96,7 +96,7 @@ class PostModel extends Model {
   }
 
   static get jsonAttributes() {
-    return ['files'];
+    return ["files"];
   }
 
   static get relationMappings(): any {

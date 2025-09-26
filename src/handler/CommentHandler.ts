@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import CommentService from "../services/CommentService";
-import { IComment } from "../model/Comment";
-import Person from "../model/Person";
+import {
+  createComment as createCommentUseCase,
+  deleteComment as deleteCommentUseCase,
+  replyToComment as replyToCommentUseCase,
+  updateComment as updateCommentUseCase
+} from "../usecases/PostUseCases";
 
 /**
  * CommentHandler - Clean architecture for comment endpoints
@@ -23,36 +27,17 @@ class CommentHandler {
       } = req.body;
       const { dni } = req.params;
 
-      const postCodeNumber = Number(post_code);
-      const replyToCodeNumber = reply_to_code ? Number(reply_to_code) : undefined;
-
-      // Get commenter details
-      const commenter = await Person.query()
-        .select("name", "lastname", "profile.image")
-        .leftJoin("profile", "person.dni", "profile.person_dni")
-        .where("person.dni", dni)
-        .first();
-
-      if (!commenter) {
-        res.status(404).json({ message: "Commenter not found" });
-        return;
-      }
-
-      const commentData: Partial<IComment> = {
-        post_code: postCodeNumber,
-        from_dni: dni,
-        from_name: `${commenter.name} ${commenter.lastname}`,
-        from_image: commenter.image,
-        message,
-        reply_to_code: replyToCodeNumber,
-        content_type,
-        url
-      };
-
-      // Create comment with attachment if file_code provided
-      const comment = file_code
-        ? await CommentService.createWithAttachment(commentData, file_code)
-        : await CommentService.create(commentData);
+      const comment = await createCommentUseCase({
+        dni,
+        payload: {
+          post_code: Number(post_code),
+          message,
+          reply_to_code: reply_to_code ? Number(reply_to_code) : undefined,
+          content_type,
+          url,
+          file_code: file_code ? Number(file_code) : undefined
+        }
+      });
 
       res.status(201).json({
         message: "Comment created successfully",
@@ -150,18 +135,11 @@ class CommentHandler {
       const { message } = req.body;
 
       // Check ownership
-      const comment = await CommentService.getById(Number(code));
-      if (!comment) {
-        res.status(404).json({ message: "Comment not found" });
-        return;
-      }
-
-      if (comment.from_dni !== dni) {
-        res.status(403).json({ message: "You can only edit your own comments" });
-        return;
-      }
-
-      const updatedComment = await CommentService.update(Number(code), { message });
+      const updatedComment = await updateCommentUseCase({
+        dni,
+        code: Number(code),
+        message
+      });
 
       res.status(200).json({
         message: "Comment updated successfully",
@@ -182,19 +160,11 @@ class CommentHandler {
       const { dni } = req.params;
       const { rol_code } = req.body || {};
 
-      // Check ownership or admin role
-      const comment = await CommentService.getById(Number(code));
-      if (!comment) {
-        res.status(404).json({ message: "Comment not found" });
-        return;
-      }
-
-      if (comment.from_dni !== dni && rol_code !== "a") {
-        res.status(403).json({ message: "You can only delete your own comments" });
-        return;
-      }
-
-      await CommentService.delete(Number(code));
+      await deleteCommentUseCase({
+        dni,
+        code: Number(code),
+        rol_code
+      });
 
       res.status(200).json({ message: "Comment deleted successfully" });
     } catch (error) {
@@ -211,32 +181,16 @@ class CommentHandler {
       const { code, dni } = req.params;
       const { message, content_type = "text", url, file_code } = req.body;
 
-      // Get commenter details
-      const commenter = await Person.query()
-        .select("name", "lastname", "profile.image")
-        .leftJoin("profile", "person.dni", "profile.person_dni")
-        .where("person.dni", dni)
-        .first();
-
-      if (!commenter) {
-        res.status(404).json({ message: "Commenter not found" });
-        return;
-      }
-
-      const replyData: Partial<IComment> = {
-        from_dni: dni,
-        from_name: `${commenter.name} ${commenter.lastname}`,
-        from_image: commenter.image,
-        message,
-        content_type,
-        url
-      };
-
-      const reply = await CommentService.replyToComment(
-        Number(code),
-        replyData,
-        file_code
-      );
+      const reply = await replyToCommentUseCase({
+        dni,
+        code: Number(code),
+        payload: {
+          message,
+          content_type,
+          url,
+          file_code: file_code ? Number(file_code) : undefined
+        }
+      });
 
       res.status(201).json({
         message: "Reply created successfully",

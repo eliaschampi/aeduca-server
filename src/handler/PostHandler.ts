@@ -1,7 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import PostService from "../services/PostService";
-import { IPost } from "../model/Post";
-import Person from "../model/Person";
+import {
+  createPost as createPostUseCase,
+  deletePost as deletePostUseCase,
+  setPostApproval as setPostApprovalUseCase,
+  toggleLike as toggleLikeUseCase,
+  toggleSave as toggleSaveUseCase,
+  updatePost as updatePostUseCase
+} from "../usecases/PostUseCases";
 
 /**
  * PostHandler - Clean architecture for post endpoints
@@ -16,34 +22,21 @@ class PostHandler {
       const { content, commentable, link, share_with, files, approved } = req.body;
       const { dni } = req.params;
 
-      // Get creator details
-      const creator = await Person.query()
-        .select("name", "lastname", "profile.image")
-        .leftJoin("profile", "person.dni", "profile.person_dni")
-        .where("person.dni", dni)
-        .first();
+      const fileCodes = Array.isArray(files)
+        ? files.map((value) => Number(value)).filter((value) => Number.isInteger(value))
+        : undefined;
 
-      if (!creator) {
-        res.status(404).json({ message: "Creator not found" });
-        return;
-      }
-
-      const postData: Partial<IPost> = {
-        content,
-        commentable: commentable !== false,
-        link,
-        creator_dni: dni,
-        creator_name: `${creator.name} ${creator.lastname}`,
-        creator_image: creator.image,
-        share_with: share_with || ["all"],
-        approved: approved || false
-      };
-
-      // Create post with files if provided
-      const post =
-        files && files.length > 0
-          ? await PostService.createWithFiles(postData, files)
-          : await PostService.create(postData);
+      const post = await createPostUseCase({
+        dni,
+        payload: {
+          content,
+          commentable,
+          link,
+          share_with,
+          files: fileCodes,
+          approved
+        }
+      });
 
       res.status(201).json({
         message: "Post created successfully",
@@ -165,25 +158,16 @@ class PostHandler {
       const { code, dni } = req.params;
       const { content, commentable, link, share_with } = req.body;
 
-      // Check ownership
-      const post = await PostService.getById(Number(code));
-      if (!post) {
-        res.status(404).json({ message: "Post not found" });
-        return;
-      }
-
-      if (post.creator_dni !== dni) {
-        res.status(403).json({ message: "You can only edit your own posts" });
-        return;
-      }
-
-      const updateData: Partial<IPost> = {};
-      if (content !== undefined) updateData.content = content;
-      if (commentable !== undefined) updateData.commentable = commentable;
-      if (link !== undefined) updateData.link = link;
-      if (share_with !== undefined) updateData.share_with = share_with;
-
-      const updatedPost = await PostService.update(Number(code), updateData);
+      const updatedPost = await updatePostUseCase({
+        dni,
+        code: Number(code),
+        payload: {
+          content,
+          commentable,
+          link,
+          share_with
+        }
+      });
 
       res.status(200).json({
         message: "Post updated successfully",
@@ -203,19 +187,11 @@ class PostHandler {
       const { code, dni } = req.params;
       const { rol_code } = req.body || {};
 
-      // Check ownership or admin role
-      const post = await PostService.getById(Number(code));
-      if (!post) {
-        res.status(404).json({ message: "Post not found" });
-        return;
-      }
-
-      if (post.creator_dni !== dni && rol_code !== "a") {
-        res.status(403).json({ message: "You can only delete your own posts" });
-        return;
-      }
-
-      await PostService.delete(Number(code));
+      await deletePostUseCase({
+        dni,
+        code: Number(code),
+        rol_code
+      });
 
       res.status(200).json({ message: "Post deleted successfully" });
     } catch (error) {
@@ -232,7 +208,10 @@ class PostHandler {
       const { code } = req.params;
       const { dni } = req.body;
 
-      const result = await PostService.toggleLike(Number(code), dni);
+      const result = await toggleLikeUseCase({
+        code: Number(code),
+        dni
+      });
 
       res.status(200).json({
         message: result.liked ? "Post liked" : "Post unliked",
@@ -252,7 +231,10 @@ class PostHandler {
       const { code } = req.params;
       const { dni } = req.body;
 
-      const result = await PostService.toggleSave(Number(code), dni);
+      const result = await toggleSaveUseCase({
+        code: Number(code),
+        dni
+      });
 
       res.status(200).json({
         message: result.saved ? "Post saved" : "Post unsaved",
@@ -278,7 +260,7 @@ class PostHandler {
         return;
       }
 
-      const post = await PostService.setApprovalStatus(Number(code), approved);
+      const post = await setPostApprovalUseCase({ code: Number(code), approved });
 
       res.status(200).json({
         message: `Post ${approved ? "approved" : "rejected"}`,
