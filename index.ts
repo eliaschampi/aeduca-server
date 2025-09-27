@@ -2,6 +2,7 @@ import cors from "cors";
 import { config } from "dotenv";
 import express from "express";
 import { KnexConection } from "./src/con/KnexConection";
+import { NextyaKnexConnection } from "./src/con/NextyaKnexConnection";
 import { socketConection } from "./src/con/SocketConection";
 import useHelmet from "./src/config/helmet";
 import pgtype from "./src/config/pgtype";
@@ -44,6 +45,9 @@ pgtype();
 // Database connection (PostgreSQL only)
 KnexConection();
 
+// Nextya database connection
+NextyaKnexConnection();
+
 // Socket.IO connection
 const server = socketConection(app);
 
@@ -71,6 +75,7 @@ server.listen(port, () => {
   console.log(`📦 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🔌 API URL: ${api_url}`);
   console.log(`✅ PostgreSQL connected`);
+  console.log(`✅ Nextya PostgreSQL connected`);
   console.log(`🔄 Socket.IO enabled`);
 });
 
