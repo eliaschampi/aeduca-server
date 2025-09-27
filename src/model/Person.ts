@@ -15,7 +15,7 @@ class Person extends Model {
   lastname?: string;
   image?: string;
   full_name?: string;
-
+  email?: string;
   static get tableName(): string {
     return "person";
   }
