@@ -20,8 +20,6 @@ router.delete("/:code/:dni", PostHandler.delete);
 // Interaction routes (require user dni in body)
 router.post("/:code/like", PostHandler.toggleLike);
 router.post("/:code/save", PostHandler.toggleSave);
-
-// Admin routes
-router.patch("/:code/approve", PostHandler.setApproval);
+router.patch("/:code/commentable/:dni", PostHandler.toggleCommentable);
 
 export default router;

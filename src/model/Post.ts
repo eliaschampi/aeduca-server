@@ -22,7 +22,6 @@ export type IPost = {
   share_with: string[];
   savelist?: string[];
   files?: IPostAttachment[];
-  approved: boolean;
   created_at?: Date;
   updated_at?: Date;
 };
@@ -39,7 +38,6 @@ class PostModel extends Model {
   share_with!: string[];
   savelist?: string[];
   files?: IPostAttachment[];
-  approved!: boolean;
   created_at?: Date;
   updated_at?: Date;
 
@@ -88,7 +86,6 @@ class PostModel extends Model {
             }
           }
         },
-        approved: { type: "boolean" },
         created_at: { type: ["string", "null"] },
         updated_at: { type: ["string", "null"] }
       }

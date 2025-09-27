@@ -6,7 +6,6 @@ import { byCodeIn } from "./FileService";
 type PostFilters = {
   dni?: string;
   section_code?: string;
-  approved?: boolean;
   limit?: number;
   offset?: number;
 };
@@ -50,11 +49,6 @@ class PostService {
 
     // Add comment count
     query = query.select(PostModel.raw("COUNT(DISTINCT comment.code) as comment_count"));
-
-    // Apply filters
-    if (filters.approved !== undefined) {
-      query = query.where("post.approved", filters.approved);
-    }
 
     if (filters.dni) {
       // Get posts visible to this user
@@ -100,7 +94,6 @@ class PostService {
     return await this.getPosts({
       dni,
       section_code,
-      approved: true,
       limit,
       offset
     });
@@ -182,8 +175,10 @@ class PostService {
     };
   }
 
-  async setApprovalStatus(postId: number, approved: boolean): Promise<PostModel> {
-    return await PostModel.query().updateAndFetchById(postId, { approved });
+  async toggleCommentable(post: PostModel): Promise<PostModel> {
+    return await PostModel.query().patchAndFetchById(post.code, {
+      commentable: !post.commentable
+    });
   }
   /**
    * Create post with transaction

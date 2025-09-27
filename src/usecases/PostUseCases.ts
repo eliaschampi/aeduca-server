@@ -3,7 +3,6 @@ import CommentService from "../services/CommentService";
 import CommentModel, { IComment } from "../model/Comment";
 import { IPost } from "../model/Post";
 import {
-  emitPostApproved,
   emitPostCreated,
   emitPostDeleted,
   emitPostLiked,
@@ -26,7 +25,6 @@ export type PostCreateInput = {
     link?: string;
     share_with?: string[];
     files?: number[];
-    approved?: boolean;
   };
 };
 
@@ -49,11 +47,6 @@ export type PostDeleteInput = {
 export type PostToggleReactionInput = {
   code: number;
   dni: string;
-};
-
-export type PostApprovalInput = {
-  code: number;
-  approved: boolean;
 };
 
 export type CommentCreateInput = {
@@ -104,8 +97,7 @@ export async function createPost({ dni, payload }: PostCreateInput) {
     creator_dni: dni,
     creator_name: `${creator.name} ${creator.lastname}`.trim(),
     creator_image: creator.image ?? undefined,
-    share_with: ensureShareWith(payload.share_with),
-    approved: payload.approved ?? false
+    share_with: ensureShareWith(payload.share_with)
   };
 
   const post =
@@ -183,9 +175,19 @@ export async function toggleSave({ code, dni }: PostToggleReactionInput) {
   return result;
 }
 
-export async function setPostApproval({ code, approved }: PostApprovalInput) {
-  const updated = await PostService.setApprovalStatus(code, approved);
-  emitPostApproved(updated);
+export async function toggleCommentable({ code, dni }: PostToggleReactionInput) {
+  const existing = await PostService.getById(code);
+
+  if (!existing) {
+    throw new Error("Post no encontrado");
+  }
+
+  if (existing.creator_dni !== dni) {
+    throw new Error("No autorizado para actualizar este post");
+  }
+
+  const updated = await PostService.toggleCommentable(existing);
+  emitPostUpdated(updated);
   return updated;
 }
 

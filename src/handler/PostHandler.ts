@@ -3,9 +3,9 @@ import PostService from "../services/PostService";
 import {
   createPost as createPostUseCase,
   deletePost as deletePostUseCase,
-  setPostApproval as setPostApprovalUseCase,
   toggleLike as toggleLikeUseCase,
   toggleSave as toggleSaveUseCase,
+  toggleCommentable as toggleCommentableUseCase,
   updatePost as updatePostUseCase
 } from "../usecases/PostUseCases";
 
@@ -19,7 +19,7 @@ class PostHandler {
    */
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { content, commentable, link, share_with, files, approved } = req.body;
+      const { content, commentable, link, share_with, files } = req.body;
       const { dni } = req.params;
 
       const fileCodes = Array.isArray(files)
@@ -33,8 +33,7 @@ class PostHandler {
           commentable,
           link,
           share_with,
-          files: fileCodes,
-          approved
+          files: fileCodes
         }
       });
 
@@ -223,19 +222,25 @@ class PostHandler {
   }
 
   /**
-   * Approve or reject a post (admin only)
-   * PATCH /api/v1/post/:code/approve
+   * Toggle commentable state on a post
+   * PATCH /api/v1/post/:code/commentable/:dni
    */
-  async setApproval(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async toggleCommentable(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
-      const { code } = req.params;
-      const { approved } = req.body;
+      const { code, dni } = req.params;
 
-      const post = await setPostApprovalUseCase({ code: Number(code), approved });
+      const updatedPost = await toggleCommentableUseCase({
+        code: Number(code),
+        dni
+      });
 
       res.status(200).json({
-        message: `Post ${approved ? "approved" : "rejected"}`,
-        value: post
+        message: `Comentarios ${updatedPost.commentable ? "habilitados" : "deshabilitados"}`,
+        value: updatedPost
       });
     } catch (error) {
       next(error);

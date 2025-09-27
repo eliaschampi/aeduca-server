@@ -6,8 +6,7 @@ export const POST_EVENTS = {
   UPDATED: "post:updated",
   DELETED: "post:deleted",
   LIKED: "post:liked",
-  SAVED: "post:saved",
-  APPROVED: "post:approved"
+  SAVED: "post:saved"
 } as const;
 
 export type PostLikePayload = {
@@ -46,9 +45,4 @@ export function emitPostLiked(post: PostModel, payload: PostLikePayload): void {
 export function emitPostSaved(post: PostModel, payload: PostSavePayload): void {
   const rooms = buildPostRooms(post);
   emitToRooms(POST_EVENTS.SAVED, payload, rooms);
-}
-
-export function emitPostApproved(post: PostModel): void {
-  const rooms = buildPostRooms(post);
-  emitToRooms(POST_EVENTS.APPROVED, serializePost(post), rooms);
 }
