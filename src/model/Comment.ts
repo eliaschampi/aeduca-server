@@ -2,14 +2,6 @@ import { Model } from "objection";
 import PostModel from "./Post";
 import Person from "./Person";
 
-export type ICommentAttachment = {
-  code: number;
-  name: string;
-  type: string;
-  size: number;
-  dni: string;
-};
-
 export type IComment = {
   code?: number;
   post_code: number;
@@ -17,7 +9,6 @@ export type IComment = {
   from_name: string;
   from_image?: string;
   message: string;
-  attached?: ICommentAttachment;
   reply_to_code?: number;
   content_type: string;
   url?: string;
@@ -32,7 +23,6 @@ class CommentModel extends Model {
   from_name!: string;
   from_image?: string;
   message!: string;
-  attached?: ICommentAttachment;
   reply_to_code?: number;
   content_type!: string;
   url?: string;
@@ -58,16 +48,6 @@ class CommentModel extends Model {
         from_name: { type: "string" },
         from_image: { type: ["string", "null"] },
         message: { type: "string" },
-        attached: {
-          type: ["object", "null"],
-          properties: {
-            code: { type: "integer" },
-            name: { type: "string" },
-            type: { type: "string" },
-            size: { type: "integer" },
-            dni: { type: "string" }
-          }
-        },
         reply_to_code: { type: ["integer", "null"] },
         content_type: { type: "string" },
         url: { type: ["string", "null"] },

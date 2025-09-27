@@ -4,11 +4,6 @@ import verifyToken from "../middleware/verifyToken";
 
 const router = Router();
 
-// Public routes
-router.get("/search", PostHandler.search);
-router.get("/:code", PostHandler.getById);
-router.get("/:code/stats", PostHandler.getStats);
-
 // Protected routes
 router.use(verifyToken); // Apply auth middleware to all routes below
 
@@ -25,8 +20,6 @@ router.delete("/:code/:dni", PostHandler.delete);
 // Interaction routes (require user dni in body)
 router.post("/:code/like", PostHandler.toggleLike);
 router.post("/:code/save", PostHandler.toggleSave);
-
-// Admin routes
-router.patch("/:code/approve", PostHandler.setApproval);
+router.patch("/:code/commentable/:dni", PostHandler.toggleCommentable);
 
 export default router;

@@ -6,7 +6,6 @@ import { byCodeIn } from "./FileService";
 type PostFilters = {
   dni?: string;
   section_code?: string;
-  approved?: boolean;
   limit?: number;
   offset?: number;
 };
@@ -50,11 +49,6 @@ class PostService {
 
     // Add comment count
     query = query.select(PostModel.raw("COUNT(DISTINCT comment.code) as comment_count"));
-
-    // Apply filters
-    if (filters.approved !== undefined) {
-      query = query.where("post.approved", filters.approved);
-    }
 
     if (filters.dni) {
       // Get posts visible to this user
@@ -100,7 +94,6 @@ class PostService {
     return await this.getPosts({
       dni,
       section_code,
-      approved: true,
       limit,
       offset
     });
@@ -182,60 +175,15 @@ class PostService {
     };
   }
 
-  /**
-   * Approve or reject a post
-   */
-  async setApprovalStatus(postId: number, approved: boolean): Promise<PostModel> {
-    return await PostModel.query().updateAndFetchById(postId, { approved });
+  async toggleCommentable(post: PostModel): Promise<PostModel> {
+    return await PostModel.query().patchAndFetchById(post.code, {
+      commentable: !post.commentable
+    });
   }
-
-  /**
-   * Search posts by content
-   */
-  async search(query: string, filters: PostFilters): Promise<PostModel[]> {
-    let searchQuery = PostModel.query()
-      .where("content", "ilike", `%${query}%`)
-      .orderBy("created_at", "desc");
-
-    if (filters.approved !== undefined) {
-      searchQuery = searchQuery.where("approved", filters.approved);
-    }
-
-    if (filters.limit) {
-      searchQuery = searchQuery.limit(filters.limit);
-    }
-
-    return await searchQuery;
-  }
-
-  /**
-   * Get post statistics
-   */
-  async getStats(postCode: number): Promise<any> {
-    const post = await PostModel.query().findById(postCode);
-
-    if (!post) {
-      throw new Error("Post not found");
-    }
-
-    const commentCountResult = await CommentModel.query()
-      .where("post_code", postCode)
-      .count("code as count")
-      .first();
-
-    const commentsCount = Number((commentCountResult as any)?.count ?? 0);
-
-    return {
-      likes_count: post.likes?.length || 0,
-      saves_count: post.savelist?.length || 0,
-      comments_count: commentsCount
-    };
-  }
-
   /**
    * Create post with transaction
    */
-  async createWithFiles(
+  async createWithTransaction(
     postData: Partial<IPost>,
     fileCodes: number[]
   ): Promise<PostModel> {
