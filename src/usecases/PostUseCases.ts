@@ -64,7 +64,6 @@ export type CommentCreateInput = {
     reply_to_code?: number;
     content_type?: string;
     url?: string;
-    file_code?: number;
   };
 };
 
@@ -86,7 +85,6 @@ export type CommentReplyInput = {
     message: string;
     content_type?: string;
     url?: string;
-    file_code?: number;
   };
 };
 
@@ -224,9 +222,7 @@ export async function createComment({ dni, payload }: CommentCreateInput) {
     url: payload.url
   };
 
-  const comment = payload.file_code
-    ? await CommentService.createWithAttachment(commentData, payload.file_code)
-    : await CommentService.create(commentData);
+  const comment = await CommentService.create(commentData);
 
   emitCommentCreated(comment);
   return comment;
@@ -267,7 +263,7 @@ export async function replyToComment({ dni, code, payload }: CommentReplyInput) 
     url: payload.url
   };
 
-  const reply = await CommentService.replyToComment(code, replyData, payload.file_code);
+  const reply = await CommentService.replyToComment(code, replyData);
   emitReplyCreated(reply);
   return reply;
 }

@@ -103,28 +103,24 @@ export function connection(io: IO): void {
       socket.to(`post:${postCode}`).emit("comment:typing", postCode, value);
     });
 
-    socket.on(
-      "post:join",
-      (payload: { post_code: number }, ack?: Ack) =>
-        handleWithAuth(socket, ack, async () => {
-          const postCode = payload?.post_code;
-          if (!postCode) {
-            throw new Error("Código de publicación requerido");
-          }
-          socket.join(`post:${postCode}`);
-        })
+    socket.on("post:join", (payload: { post_code: number }, ack?: Ack) =>
+      handleWithAuth(socket, ack, async () => {
+        const postCode = payload?.post_code;
+        if (!postCode) {
+          throw new Error("Código de publicación requerido");
+        }
+        socket.join(`post:${postCode}`);
+      })
     );
 
-    socket.on(
-      "post:leave",
-      (payload: { post_code: number }, ack?: Ack) =>
-        handleWithAuth(socket, ack, async () => {
-          const postCode = payload?.post_code;
-          if (!postCode) {
-            throw new Error("Código de publicación requerido");
-          }
-          socket.leave(`post:${postCode}`);
-        })
+    socket.on("post:leave", (payload: { post_code: number }, ack?: Ack) =>
+      handleWithAuth(socket, ack, async () => {
+        const postCode = payload?.post_code;
+        if (!postCode) {
+          throw new Error("Código de publicación requerido");
+        }
+        socket.leave(`post:${postCode}`);
+      })
     );
 
     socket.on("post:create", (payload, ack?: Ack) =>

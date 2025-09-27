@@ -17,14 +17,7 @@ class CommentHandler {
    */
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const {
-        post_code,
-        message,
-        reply_to_code,
-        content_type = "text",
-        url,
-        file_code
-      } = req.body;
+      const { post_code, message, reply_to_code, content_type = "text", url } = req.body;
       const { dni } = req.params;
 
       const comment = await createCommentUseCase({
@@ -34,8 +27,7 @@ class CommentHandler {
           message,
           reply_to_code: reply_to_code ? Number(reply_to_code) : undefined,
           content_type,
-          url,
-          file_code: file_code ? Number(file_code) : undefined
+          url
         }
       });
 
@@ -138,7 +130,7 @@ class CommentHandler {
   async reply(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code, dni } = req.params;
-      const { message, content_type = "text", url, file_code } = req.body;
+      const { message, content_type = "text", url } = req.body;
 
       const reply = await replyToCommentUseCase({
         dni,
@@ -146,8 +138,7 @@ class CommentHandler {
         payload: {
           message,
           content_type,
-          url,
-          file_code: file_code ? Number(file_code) : undefined
+          url
         }
       });
 

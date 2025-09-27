@@ -1,7 +1,5 @@
-import { Transaction } from "objection";
-import CommentModel, { IComment, ICommentAttachment } from "../model/Comment";
+import CommentModel, { IComment } from "../model/Comment";
 import PostModel from "../model/Post";
-import { byCode } from "./FileService";
 
 type CommentFilters = {
   post_code?: number;
@@ -14,10 +12,9 @@ class CommentService {
   /**
    * Create a new comment
    */
-  async create(commentData: Partial<IComment>, trx?: Transaction): Promise<CommentModel> {
+  async create(commentData: Partial<IComment>): Promise<CommentModel> {
     // Verify post exists
-    const postQuery = trx ? PostModel.query(trx) : PostModel.query();
-    const post = await postQuery.findById(commentData.post_code!);
+    const post = await PostModel.query().findById(commentData.post_code!);
     if (!post) {
       throw new Error("Post no encontrado");
     }
@@ -26,9 +23,7 @@ class CommentService {
       throw new Error("Comentarios deshabilitados para este post");
     }
 
-    const commentQuery = trx ? CommentModel.query(trx) : CommentModel.query();
-
-    return await commentQuery.insert(commentData);
+    return await CommentModel.query().insert(commentData);
   }
 
   /**
@@ -53,18 +48,82 @@ class CommentService {
     limit = 20,
     offset = 0
   ): Promise<CommentModel[]> {
-    return await CommentModel.query()
+    type CommentGraph = ReturnType<CommentModel["toJSON"]> & { replies: CommentGraph[] };
+
+    const allComments = await CommentModel.query()
       .where("post_code", post_code)
-      .whereNull("reply_to_code") // Only get top-level comments
-      .withGraphFetched("replies(orderByCreated)")
-      .modifiers({
-        orderByCreated(builder) {
-          builder.orderBy("created_at", "desc");
+      .withGraphFetched("from")
+      .orderBy("created_at", "desc");
+
+    const commentMap = new Map<number, CommentGraph>();
+    const topLevelComments: CommentGraph[] = [];
+
+    const serializeComment = (comment: CommentModel): CommentGraph => {
+      const plain = comment.toJSON() as CommentGraph;
+      return {
+        ...plain,
+        replies: []
+      };
+    };
+
+    for (const comment of allComments) {
+      const serialized = serializeComment(comment);
+      commentMap.set(serialized.code, serialized);
+    }
+
+    for (const comment of allComments) {
+      const current = commentMap.get(comment.code);
+      if (!current) continue;
+
+      if (comment.reply_to_code) {
+        const parent = commentMap.get(comment.reply_to_code);
+        if (parent) {
+          parent.replies.push(current);
         }
-      })
-      .orderBy("created_at", "desc")
-      .limit(limit)
-      .offset(offset);
+      } else {
+        topLevelComments.push(current);
+      }
+    }
+
+    const sortByCreatedDesc = (items: CommentGraph[]) => {
+      items.sort((a, b) => {
+        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return bTime - aTime;
+      });
+
+      for (const item of items) {
+        if (item.replies.length > 0) {
+          sortByCreatedDesc(item.replies);
+        }
+      }
+    };
+
+    sortByCreatedDesc(topLevelComments);
+
+    const start = Math.max(0, offset);
+    const end = start + Math.max(0, limit);
+
+    const toIsoStringOrNull = (value: unknown): string | null => {
+      if (!value) return null;
+      const date = value instanceof Date ? value : new Date(value as string);
+      return Number.isNaN(date.getTime()) ? null : date.toISOString();
+    };
+
+    const convertToModel = (comment: CommentGraph): CommentModel => {
+      const payload = {
+        ...comment,
+        created_at: toIsoStringOrNull(comment.created_at),
+        updated_at: toIsoStringOrNull(comment.updated_at),
+        replies: comment.replies.map((reply) => convertToModel(reply))
+      };
+
+      return CommentModel.fromJson(payload) as CommentModel;
+    };
+
+    const paginated = topLevelComments.slice(start, end);
+
+    return paginated.map((comment) => convertToModel(comment));
   }
 
   /**
@@ -110,43 +169,6 @@ class CommentService {
   }
 
   /**
-   * Create comment with attachment
-   */
-  async createWithAttachment(
-    commentData: Partial<IComment>,
-    fileCode?: number
-  ): Promise<CommentModel> {
-    if (!commentData.post_code) {
-      throw new Error("post_code es requerido para adjuntar un archivo a un comentario");
-    }
-
-    return await CommentModel.transaction(async (trx: Transaction) => {
-      // Get file details if provided
-      let attached: ICommentAttachment | undefined;
-      if (fileCode) {
-        const file = await byCode(fileCode);
-        if (file) {
-          attached = {
-            code: file.code,
-            name: file.name,
-            type: file.type || "otr",
-            size: file.size || 0,
-            dni: file.dni
-          };
-        }
-      }
-
-      return await this.create(
-        {
-          ...commentData,
-          attached
-        },
-        trx
-      );
-    });
-  }
-
-  /**
    * Get comments with filters
    */
   async getComments(filters: CommentFilters): Promise<CommentModel[]> {
@@ -176,8 +198,7 @@ class CommentService {
    */
   async replyToComment(
     comment_code: number,
-    replyData: Partial<IComment>,
-    fileCode?: number
+    replyData: Partial<IComment>
   ): Promise<CommentModel> {
     // Get original comment to verify it exists and get post_id
     const originalComment = await CommentModel.query().findById(comment_code);
@@ -191,10 +212,6 @@ class CommentService {
       post_code: originalComment.post_code,
       reply_to_code: comment_code
     };
-
-    if (fileCode) {
-      return await this.createWithAttachment(replyPayload, fileCode);
-    }
 
     return await this.create(replyPayload);
   }
