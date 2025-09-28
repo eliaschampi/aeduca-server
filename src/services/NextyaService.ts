@@ -1,5 +1,12 @@
 import { nextyaKnex } from "../con/NextyaKnexConnection";
 
+/**
+ * NextYa Student Analytics Service
+ * Optimized for Chart.js integration with clean SQL function calls
+ * No fallbacks - uses only optimized PostgreSQL functions from Nextya database
+ */
+
+// Core interfaces for student data
 export interface StudentInfo {
   code: string;
   name: string;
@@ -41,8 +48,35 @@ export interface StudentAnswer {
   section_name?: string;
 }
 
+// Chart.js optimized interfaces
+export interface ScoreEvolutionItem {
+  eval_code: string;
+  eval_name: string;
+  eval_date: string; // ISO date for Chart.js time axis
+  score: number;     // Numeric for Chart.js datasets
+}
+
+export interface CourseScoreItem {
+  course_code: string;
+  course_name: string;
+  average_score: number; // Rounded for Chart.js doughnut
+}
+
+export interface CourseEvolutionItem {
+  eval_code: string;
+  eval_name: string;
+  eval_date: string;   // ISO date for Chart.js time axis
+  course_code: string;
+  course_name: string;
+  score: number;       // Numeric for Chart.js bar chart
+}
+
 export class NextyaService {
-  async getStudentCodeByDni(dni: string): Promise<string | null> {
+  /**
+   * Core helper: Get student code by DNI
+   * Used internally by all chart data methods
+   */
+  private async getStudentCodeByDni(dni: string): Promise<string | null> {
     try {
       const result = await nextyaKnex("students")
         .select("code")
@@ -56,6 +90,10 @@ export class NextyaService {
     }
   }
 
+  /**
+   * Get basic student information
+   * Used by Score module for student display
+   */
   async getStudentInfo(dni: string): Promise<StudentInfo | null> {
     try {
       const result = await nextyaKnex("students")
@@ -156,67 +194,68 @@ export class NextyaService {
     }
   }
 
-  async getStudentScoreEvolution(dni: string): Promise<any[]> {
-    const code = await this.getStudentCodeByDni(dni);
-    if (!code) return [];
-
-    try {
-      const result = await nextyaKnex.raw(
-        "SELECT * FROM get_student_score_evolution(?)",
-        [code]
-      );
-      return result.rows || [];
-    } catch (error) {
-      console.error("Error getting student score evolution:", error);
-      return [];
-    }
-  }
-
-  async getStudentCourseScores(dni: string): Promise<any[]> {
-    const code = await this.getStudentCodeByDni(dni);
-    if (!code) return [];
-
-    try {
-      const result = await nextyaKnex.raw("SELECT * FROM get_student_course_scores(?)", [
-        code
-      ]);
-      return result.rows || [];
-    } catch (error) {
-      console.error("Error getting student course scores:", error);
-      return [];
-    }
-  }
-
-  async getStudentCourseEvolution(dni: string, courseCode?: string): Promise<any[]> {
+  /**
+   * Get student score evolution data for Chart.js line chart
+   * Perfect for time-series visualization with chronological data
+   * Uses optimized PostgreSQL function: get_student_score_evolution()
+   */
+  async getStudentScoreEvolution(dni: string): Promise<ScoreEvolutionItem[]> {
     const studentCode = await this.getStudentCodeByDni(dni);
     if (!studentCode) return [];
 
     try {
-      let query = nextyaKnex("eval_results")
-        .join("eval_sections", "eval_results.section_code", "eval_sections.code")
-        .join("courses", "eval_sections.course_code", "courses.code")
-        .join("evals", "eval_results.eval_code", "evals.code")
-        .join("registers", "eval_results.register_code", "registers.code")
-        .select(
-          "evals.eval_code",
-          "evals.name as eval_name",
-          "evals.eval_date",
-          "eval_results.score",
-          "courses.code as course_code",
-          "courses.name as course_name"
-        )
-        .where("registers.student_code", studentCode)
-        .andWhere("eval_results.section_code", "IS NOT", null)
-        .orderBy("evals.eval_date", "asc");
-
-      if (courseCode) {
-        query = query.andWhere("courses.code", courseCode);
-      }
-
-      const results = await query;
-      return results;
+      const result = await nextyaKnex.raw(
+        "SELECT eval_code, eval_name, eval_date, score FROM get_student_score_evolution(?)",
+        [studentCode]
+      );
+      return result.rows || [];
     } catch (error) {
-      console.error("Error getting student course evolution:", error);
+      console.error("[NextyaService] Score evolution query failed:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Get student course average scores for Chart.js doughnut/pie chart
+   * Perfect for showing course performance distribution
+   * Uses optimized PostgreSQL function: get_student_course_scores()
+   */
+  async getStudentCourseScores(dni: string): Promise<CourseScoreItem[]> {
+    const studentCode = await this.getStudentCodeByDni(dni);
+    if (!studentCode) return [];
+
+    try {
+      const result = await nextyaKnex.raw(
+        "SELECT course_code, course_name, average_score FROM get_student_course_scores(?)",
+        [studentCode]
+      );
+      return result.rows || [];
+    } catch (error) {
+      console.error("[NextyaService] Course scores query failed:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Get student course evolution data for Chart.js bar chart
+   * Perfect for showing performance trends by course over time
+   * Uses optimized PostgreSQL function: get_student_course_evolution_by_course()
+   * 
+   * @param dni - Student DNI
+   * @param courseCode - Optional course filter for specific course evolution
+   */
+  async getStudentCourseEvolution(dni: string, courseCode?: string): Promise<CourseEvolutionItem[]> {
+    const studentCode = await this.getStudentCodeByDni(dni);
+    if (!studentCode) return [];
+
+    try {
+      const result = await nextyaKnex.raw(
+        "SELECT eval_code, eval_name, eval_date, course_code, course_name, score FROM get_student_course_evolution_by_course(?, ?)",
+        [studentCode, courseCode || null]
+      );
+      return result.rows || [];
+    } catch (error) {
+      console.error("[NextyaService] Course evolution query failed:", error);
       return [];
     }
   }
