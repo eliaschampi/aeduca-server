@@ -25,9 +25,7 @@ router.get("/student/:dni", async (req: Request, res: Response) => {
     return res.json(data);
   } catch (error) {
     console.error("Error en endpoint de información del estudiante:", error);
-    return res
-      .status(500)
-      .json({ error: "Error al obtener información del estudiante" });
+    return res.status(500).json({ error: "Error al obtener información del estudiante" });
   }
 });
 
@@ -47,9 +45,7 @@ router.get("/student/:dni/results", async (req: Request, res: Response) => {
     return res.json(data);
   } catch (error) {
     console.error("Error en endpoint de resultados del estudiante:", error);
-    return res
-      .status(500)
-      .json({ error: "Error al obtener resultados del estudiante" });
+    return res.status(500).json({ error: "Error al obtener resultados del estudiante" });
   }
 });
 
@@ -69,9 +65,7 @@ router.get("/student/:dni/answers/:evalCode", async (req: Request, res: Response
     return res.json(data);
   } catch (error) {
     console.error("Error en endpoint de respuestas del estudiante:", error);
-    return res
-      .status(500)
-      .json({ error: "Error al obtener respuestas del estudiante" });
+    return res.status(500).json({ error: "Error al obtener respuestas del estudiante" });
   }
 });
 

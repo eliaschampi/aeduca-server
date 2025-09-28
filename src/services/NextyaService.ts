@@ -6,16 +6,16 @@ import { nextyaKnex } from "../con/NextyaKnexConnection";
  * No fallbacks - uses only optimized PostgreSQL functions from Nextya database
  */
 
-// Core interfaces for student data
-export interface StudentInfo {
+// Core types for student data
+export type StudentInfo = {
   code: string;
   name: string;
   last_name: string;
   dni: string;
   email?: string;
-}
+};
 
-export interface StudentResult {
+export type StudentResult = {
   result_code: string;
   register_code: string;
   student_code: string;
@@ -34,9 +34,9 @@ export interface StudentResult {
   blank_count: number;
   score: number;
   calculated_at: string;
-}
+};
 
-export interface StudentAnswer {
+export type StudentAnswer = {
   question_code: string;
   student_answer: string | null;
   order_in_eval: number;
@@ -46,30 +46,30 @@ export interface StudentAnswer {
   is_multiple: boolean;
   section_code?: string;
   section_name?: string;
-}
+};
 
-// Chart.js optimized interfaces
-export interface ScoreEvolutionItem {
+// Chart.js optimized types
+export type ScoreEvolutionItem = {
   eval_code: string;
   eval_name: string;
   eval_date: string; // ISO date for Chart.js time axis
-  score: number;     // Numeric for Chart.js datasets
-}
+  score: number; // Numeric for Chart.js datasets
+};
 
-export interface CourseScoreItem {
+export type CourseScoreItem = {
   course_code: string;
   course_name: string;
   average_score: number; // Rounded for Chart.js doughnut
-}
+};
 
-export interface CourseEvolutionItem {
+export type CourseEvolutionItem = {
   eval_code: string;
   eval_name: string;
-  eval_date: string;   // ISO date for Chart.js time axis
+  eval_date: string; // ISO date for Chart.js time axis
   course_code: string;
   course_name: string;
-  score: number;       // Numeric for Chart.js bar chart
-}
+  score: number; // Numeric for Chart.js bar chart
+};
 
 export class NextyaService {
   /**
@@ -177,7 +177,7 @@ export class NextyaService {
         .where("eval_questions.eval_code", evalCode)
         .orderBy("eval_questions.order_in_eval", "asc");
 
-      return answers.map(answer => ({
+      return answers.map((answer) => ({
         question_code: answer.question_code,
         student_answer: answer.student_answer,
         order_in_eval: answer.order_in_eval,
@@ -240,11 +240,14 @@ export class NextyaService {
    * Get student course evolution data for Chart.js bar chart
    * Perfect for showing performance trends by course over time
    * Uses optimized PostgreSQL function: get_student_course_evolution_by_course()
-   * 
+   *
    * @param dni - Student DNI
    * @param courseCode - Optional course filter for specific course evolution
    */
-  async getStudentCourseEvolution(dni: string, courseCode?: string): Promise<CourseEvolutionItem[]> {
+  async getStudentCourseEvolution(
+    dni: string,
+    courseCode?: string
+  ): Promise<CourseEvolutionItem[]> {
     const studentCode = await this.getStudentCodeByDni(dni);
     if (!studentCode) return [];
 
