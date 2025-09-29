@@ -12,12 +12,11 @@ export class NextyaService {
    * Core helper: Get register code by DNI
    * Used internally by all chart data methods
    */
-  private async getRegisterCodeByDni(dni: string): Promise<string | null> {
+  private async getStudentCodeByDni(dni: string): Promise<string | null> {
     try {
-      const result = await nextyaKnex("registers as r")
-        .select("r.code")
-        .join("students as s", "s.code", "r.student_code")
-        .where("s.dni", dni)
+      const result = await nextyaKnex("students")
+        .select("code")
+        .where("dni", dni)
         .first();
 
       return result?.code || null;
@@ -28,7 +27,7 @@ export class NextyaService {
   }
 
   async getStudentResults(dni: string): Promise<StudentResult[]> {
-    const studentCode = await this.getRegisterCodeByDni(dni);
+    const studentCode = await this.getStudentCodeByDni(dni);
     if (!studentCode) return [];
 
     try {
@@ -69,7 +68,7 @@ export class NextyaService {
   }
 
   async getStudentAnswers(dni: string, evalCode: string): Promise<StudentAnswer[]> {
-    const studentCode = await this.getRegisterCodeByDni(dni);
+    const studentCode = await this.getStudentCodeByDni(dni);
     if (!studentCode) return [];
 
     try {
@@ -119,7 +118,7 @@ export class NextyaService {
    * Uses optimized PostgreSQL function: get_student_score_evolution()
    */
   async getStudentScoreEvolution(dni: string): Promise<ScoreEvolutionItem[]> {
-    const studentCode = await this.getRegisterCodeByDni(dni);
+    const studentCode = await this.getStudentCodeByDni(dni);
     if (!studentCode) return [];
 
     try {
@@ -140,7 +139,7 @@ export class NextyaService {
    * Uses optimized PostgreSQL function: get_student_course_scores()
    */
   async getStudentCourseScores(dni: string): Promise<CourseScoreItem[]> {
-    const studentCode = await this.getRegisterCodeByDni(dni);
+    const studentCode = await this.getStudentCodeByDni(dni);
     if (!studentCode) return [];
 
     try {
@@ -167,7 +166,7 @@ export class NextyaService {
     dni: string,
     courseCode?: string
   ): Promise<CourseEvolutionItem[]> {
-    const studentCode = await this.getRegisterCodeByDni(dni);
+    const studentCode = await this.getStudentCodeByDni(dni);
     if (!studentCode) return [];
 
     try {
