@@ -1,86 +1,27 @@
 import { nextyaKnex } from "../con/NextyaKnexConnection";
-
-/**
- * NextYa Student Analytics Service
- * Optimized for Chart.js integration with clean SQL function calls
- * No fallbacks - uses only optimized PostgreSQL functions from Nextya database
- */
-
-// Core types for student data
-export type StudentInfo = {
-  code: string;
-  name: string;
-  last_name: string;
-  dni: string;
-  email?: string;
-};
-
-export type StudentResult = {
-  result_code: string;
-  register_code: string;
-  student_code: string;
-  name: string;
-  last_name: string;
-  roll_code: string;
-  group_name: string;
-  level_code: string;
-  level_name: string;
-  eval_code: string;
-  eval_name: string;
-  eval_date: string;
-  section_code?: string;
-  correct_count: number;
-  incorrect_count: number;
-  blank_count: number;
-  score: number;
-  calculated_at: string;
-};
-
-export type StudentAnswer = {
-  question_code: string;
-  student_answer: string | null;
-  order_in_eval: number;
-  correct_key: string;
-  is_correct: boolean;
-  is_blank: boolean;
-  is_multiple: boolean;
-  section_code?: string;
-  section_name?: string;
-};
-
-// Chart.js optimized types
-export type ScoreEvolutionItem = {
-  eval_code: string;
-  eval_name: string;
-  eval_date: string; // ISO date for Chart.js time axis
-  score: number; // Numeric for Chart.js datasets
-};
-
-export type CourseScoreItem = {
-  course_code: string;
-  course_name: string;
-  average_score: number; // Rounded for Chart.js doughnut
-};
-
-export type CourseEvolutionItem = {
-  eval_code: string;
-  eval_name: string;
-  eval_date: string; // ISO date for Chart.js time axis
-  course_code: string;
-  course_name: string;
-  score: number; // Numeric for Chart.js bar chart
-};
+import {
+  CourseEvolutionItem,
+  CourseScoreItem,
+  ScoreEvolutionItem,
+  StudentAnswer,
+  StudentResult
+} from "../model/Nextya";
 
 export class NextyaService {
   /**
-   * Core helper: Get student code by DNI
+   * Core helper: Get register code by DNI
    * Used internally by all chart data methods
    */
-  private async getStudentCodeByDni(dni: string): Promise<string | null> {
+  private async getRegisterCodeByDni(dni: string): Promise<string | null> {
     try {
-      const result = await nextyaKnex("students")
+      const result = await nextyaKnex("registers")
         .select("code")
-        .where("dni", dni)
+        .whereExists(
+          nextyaKnex("students")
+            .select("1")
+            .where("students.code", "registers.student_code")
+        )
+        .where("students.dni", dni)
         .first();
 
       return result?.code || null;
@@ -90,26 +31,8 @@ export class NextyaService {
     }
   }
 
-  /**
-   * Get basic student information
-   * Used by Score module for student display
-   */
-  async getStudentInfo(dni: string): Promise<StudentInfo | null> {
-    try {
-      const result = await nextyaKnex("students")
-        .select("code", "name", "last_name", "dni", "email")
-        .where("dni", dni)
-        .first();
-
-      return result || null;
-    } catch (error) {
-      console.error("Error getting student info:", error);
-      return null;
-    }
-  }
-
   async getStudentResults(dni: string): Promise<StudentResult[]> {
-    const studentCode = await this.getStudentCodeByDni(dni);
+    const studentCode = await this.getRegisterCodeByDni(dni);
     if (!studentCode) return [];
 
     try {
@@ -150,7 +73,7 @@ export class NextyaService {
   }
 
   async getStudentAnswers(dni: string, evalCode: string): Promise<StudentAnswer[]> {
-    const studentCode = await this.getStudentCodeByDni(dni);
+    const studentCode = await this.getRegisterCodeByDni(dni);
     if (!studentCode) return [];
 
     try {
@@ -200,7 +123,7 @@ export class NextyaService {
    * Uses optimized PostgreSQL function: get_student_score_evolution()
    */
   async getStudentScoreEvolution(dni: string): Promise<ScoreEvolutionItem[]> {
-    const studentCode = await this.getStudentCodeByDni(dni);
+    const studentCode = await this.getRegisterCodeByDni(dni);
     if (!studentCode) return [];
 
     try {
@@ -221,7 +144,7 @@ export class NextyaService {
    * Uses optimized PostgreSQL function: get_student_course_scores()
    */
   async getStudentCourseScores(dni: string): Promise<CourseScoreItem[]> {
-    const studentCode = await this.getStudentCodeByDni(dni);
+    const studentCode = await this.getRegisterCodeByDni(dni);
     if (!studentCode) return [];
 
     try {
@@ -248,7 +171,7 @@ export class NextyaService {
     dni: string,
     courseCode?: string
   ): Promise<CourseEvolutionItem[]> {
-    const studentCode = await this.getStudentCodeByDni(dni);
+    const studentCode = await this.getRegisterCodeByDni(dni);
     if (!studentCode) return [];
 
     try {

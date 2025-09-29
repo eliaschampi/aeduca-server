@@ -10,7 +10,7 @@ type NextyaStudent = {
 type AeducaPerson = {
   dni: string;
   name: string;
-  last_name: string;
+  lastname: string;
 };
 
 async function populateDni() {

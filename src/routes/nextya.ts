@@ -5,31 +5,6 @@ const router = Router();
 const nextyaService = new NextyaService();
 
 /**
- * GET /student/:dni
- * Returns student information by DNI
- */
-router.get("/student/:dni", async (req: Request, res: Response) => {
-  const { dni } = req.params;
-
-  if (!dni) {
-    return res.status(400).json({ error: "DNI no proporcionado" });
-  }
-
-  try {
-    const data = await nextyaService.getStudentInfo(dni);
-
-    if (!data) {
-      return res.status(404).json({ error: "Estudiante no encontrado" });
-    }
-
-    return res.json(data);
-  } catch (error) {
-    console.error("Error en endpoint de información del estudiante:", error);
-    return res.status(500).json({ error: "Error al obtener información del estudiante" });
-  }
-});
-
-/**
  * GET /student/:dni/results
  * Returns all evaluation results for a student by DNI
  */
