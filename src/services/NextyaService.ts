@@ -18,7 +18,7 @@ export class NextyaService {
         .select("code")
         .whereExists(
           nextyaKnex("students")
-            .select("1")
+            .select("code")
             .where("students.code", "registers.student_code")
         )
         .where("students.dni", dni)
