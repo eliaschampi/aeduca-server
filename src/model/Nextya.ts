@@ -1,22 +1,22 @@
 export type StudentResult = {
   result_code: string;
   register_code: string;
-  student_code: string;
-  name: string;
-  last_name: string;
-  roll_code: string;
-  group_name: string;
-  level_code: string;
-  level_name: string;
   eval_code: string;
-  eval_name: string;
-  eval_date: string;
-  section_code?: string;
+  section_code: string | null;
   correct_count: number;
   incorrect_count: number;
   blank_count: number;
   score: number;
   calculated_at: string;
+  student_code: string;
+  roll_code: string;
+  group_name: string;
+  level_code: string;
+  name: string;
+  last_name: string;
+  level_name: string;
+  eval_name: string;
+  eval_date: string;
 };
 
 export type StudentAnswer = {

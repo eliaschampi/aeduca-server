@@ -8,10 +8,6 @@ import {
 } from "../model/Nextya";
 
 export class NextyaService {
-  /**
-   * Core helper: Get register code by DNI
-   * Used internally by all chart data methods
-   */
   private async getStudentCodeByDni(dni: string): Promise<string | null> {
     try {
       const result = await nextyaKnex("students")
@@ -28,39 +24,16 @@ export class NextyaService {
 
   async getStudentResults(dni: string): Promise<StudentResult[]> {
     const studentCode = await this.getStudentCodeByDni(dni);
-    if (!studentCode) return [];
-
+    const register = await nextyaKnex("registers")
+      .select("code")
+      .where("student_code", studentCode)
+      .first();
     try {
-      const results = await nextyaKnex("eval_results")
-        .join("registers", "eval_results.register_code", "registers.code")
-        .join("students", "registers.student_code", "students.code")
-        .join("evals", "eval_results.eval_code", "evals.code")
-        .join("levels", "registers.level_code", "levels.code")
-        .leftJoin("eval_sections", "eval_results.section_code", "eval_sections.code")
-        .select(
-          "eval_results.code as result_code",
-          "eval_results.register_code",
-          "students.code as student_code",
-          "students.name",
-          "students.last_name",
-          "registers.roll_code",
-          "registers.group_name",
-          "levels.code as level_code",
-          "levels.name as level_name",
-          "evals.code as eval_code",
-          "evals.name as eval_name",
-          "evals.eval_date",
-          "eval_sections.code as section_code",
-          "eval_results.correct_count",
-          "eval_results.incorrect_count",
-          "eval_results.blank_count",
-          "eval_results.score",
-          "eval_results.calculated_at"
-        )
-        .where("students.code", studentCode)
-        .orderBy("evals.eval_date", "desc");
-
-      return results || [];
+      const rawResults = await nextyaKnex("student_register_results")
+        .select("*")
+        .whereIn("register_code", [register.code])
+        .orderBy("eval_date", "desc");
+      return rawResults;
     } catch (error) {
       console.error("Error getting student results:", error);
       return [];
