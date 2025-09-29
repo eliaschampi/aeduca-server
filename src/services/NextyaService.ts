@@ -14,14 +14,10 @@ export class NextyaService {
    */
   private async getRegisterCodeByDni(dni: string): Promise<string | null> {
     try {
-      const result = await nextyaKnex("registers")
-        .select("code")
-        .whereExists(
-          nextyaKnex("students")
-            .select("code")
-            .where("students.code", "registers.student_code")
-        )
-        .where("students.dni", dni)
+      const result = await nextyaKnex("registers as r")
+        .select("r.code")
+        .join("students as s", "s.code", "r.student_code")
+        .where("s.dni", dni)
         .first();
 
       return result?.code || null;
