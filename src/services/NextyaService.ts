@@ -3,6 +3,7 @@ import {
   CourseEvolutionItem,
   CourseScoreItem,
   ScoreEvolutionItem,
+  SectionScore,
   StudentAnswer,
   StudentResult
 } from "../model/Nextya";
@@ -150,6 +151,51 @@ export class NextyaService {
       return result.rows || [];
     } catch (error) {
       console.error("[NextyaService] Course evolution query failed:", error);
+      return [];
+    }
+  }
+
+  async getSectionScores(dni: string, evalCode: string): Promise<SectionScore[]> {
+    const studentCode = await this.getStudentCodeByDni(dni);
+    if (!studentCode) return [];
+
+    try {
+      const register = await nextyaKnex("registers")
+        .select("code")
+        .where("student_code", studentCode)
+        .first();
+
+      if (!register) return [];
+
+      const sectionResults = await nextyaKnex("eval_results")
+        .join("eval_sections", "eval_sections.code", "eval_results.section_code")
+        .join("courses", "courses.code", "eval_sections.course_code")
+        .select(
+          "eval_results.section_code",
+          "courses.name as section_name",
+          "eval_results.correct_count",
+          "eval_results.incorrect_count",
+          "eval_results.blank_count",
+          "eval_results.score"
+        )
+        .where("eval_results.register_code", register.code)
+        .where("eval_results.eval_code", evalCode)
+        .whereNotNull("eval_results.section_code")
+        .orderBy("courses.name", "asc");
+
+      return sectionResults.map((section) => ({
+        section_code: section.section_code,
+        section_name: section.section_name,
+        correct_count: section.correct_count,
+        incorrect_count: section.incorrect_count,
+        blank_count: section.blank_count,
+        total_questions:
+          section.correct_count + section.incorrect_count + section.blank_count,
+        score:
+          typeof section.score === "string" ? parseFloat(section.score) : section.score
+      }));
+    } catch (error) {
+      console.error("[NextyaService] Section scores query failed:", error);
       return [];
     }
   }

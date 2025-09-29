@@ -53,3 +53,13 @@ export type CourseEvolutionItem = {
   course_name: string;
   score: number; // Numeric for Chart.js bar chart
 };
+
+export type SectionScore = {
+  section_code: string;
+  section_name: string;
+  correct_count: number;
+  incorrect_count: number;
+  blank_count: number;
+  total_questions: number;
+  score: number;
+};

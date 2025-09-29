@@ -131,4 +131,24 @@ router.get("/student/:dni/course-evolution", async (req: Request, res: Response)
   }
 });
 
+/**
+ * GET /student/:dni/sections/:evalCode
+ * Returns section scores for a specific evaluation
+ */
+router.get("/student/:dni/sections/:evalCode", async (req: Request, res: Response) => {
+  const { dni, evalCode } = req.params;
+
+  if (!dni || !evalCode) {
+    return res.status(400).json({ error: "DNI o código de evaluación no proporcionado" });
+  }
+
+  try {
+    const data = await nextyaService.getSectionScores(dni, evalCode);
+    return res.json(data);
+  } catch (error) {
+    console.error("Error en endpoint de secciones:", error);
+    return res.status(500).json({ error: "Error al obtener secciones" });
+  }
+});
+
 export default router;
