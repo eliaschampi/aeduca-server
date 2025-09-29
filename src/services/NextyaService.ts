@@ -56,14 +56,16 @@ export class NextyaService {
 
       const answers = await nextyaKnex("eval_answers")
         .join("eval_questions", "eval_questions.code", "eval_answers.question_code")
-        .leftJoin("eval_sections", "eval_questions.section_code", "eval_sections.code")
+        .join("eval_sections", "eval_questions.section_code", "eval_sections.code")
+        .join("courses", "courses.code", "eval_sections.course_code")
         .select(
           "eval_answers.question_code",
           "eval_answers.student_answer",
           "eval_questions.order_in_eval",
           "eval_questions.correct_key",
-          "eval_sections.code as section_code",
-          "eval_sections.name as section_name"
+          "eval_questions.section_code",
+          "eval_sections.course_code",
+          "courses.name as course_name"
         )
         .where("eval_answers.register_code", register.code)
         .where("eval_questions.eval_code", evalCode)
@@ -78,7 +80,7 @@ export class NextyaService {
         is_blank: !answer.student_answer,
         is_multiple: answer.student_answer === "error_multiple",
         section_code: answer.section_code,
-        section_name: answer.section_name
+        course_name: answer.course_name
       }));
     } catch (error) {
       console.error("Error getting student answers:", error);

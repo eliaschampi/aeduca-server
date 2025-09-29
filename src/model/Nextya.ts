@@ -27,8 +27,8 @@ export type StudentAnswer = {
   is_correct: boolean;
   is_blank: boolean;
   is_multiple: boolean;
-  section_code?: string;
-  section_name?: string;
+  section_code: string;
+  course_name: string;
 };
 
 // Chart.js optimized types
