@@ -6,13 +6,14 @@ import {
   sendVerificationCode,
   storeSupport
 } from "../handler/MainHandler";
+import { asyncHandler } from "../utils/asyncHandler";
 
 const router = Router();
 
-router.post("/verificate", sendVerificationCode);
-router.get("/branch/:dni", fetchBranch);
-router.get("/:from/:type", fetchSupportByFromAndType);
-router.get("/", fetchCoursesBySpe);
-router.post("/", storeSupport);
+router.post("/verificate", asyncHandler(sendVerificationCode));
+router.get("/branch/:dni", asyncHandler(fetchBranch));
+router.get("/:from/:type", asyncHandler(fetchSupportByFromAndType));
+router.get("/", asyncHandler(fetchCoursesBySpe));
+router.post("/", asyncHandler(storeSupport));
 
 export default router;

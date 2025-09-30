@@ -1,12 +1,13 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { NextyaService } from "../services/NextyaService";
+import { asyncHandler } from "../utils/asyncHandler";
 
 const router = Router();
 const nextyaService = new NextyaService();
 
 router.get(
   "/student/:dni/results",
-  async (req: Request, res: Response, next: NextFunction) => {
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const { dni } = req.params;
 
     if (!dni) {
@@ -20,12 +21,12 @@ router.get(
     } catch (error) {
       next(error);
     }
-  }
+  })
 );
 
 router.get(
   "/student/:dni/answers/:evalCode",
-  async (req: Request, res: Response, next: NextFunction) => {
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const { dni, evalCode } = req.params;
 
     if (!dni || !evalCode) {
@@ -39,12 +40,12 @@ router.get(
     } catch (error) {
       next(error);
     }
-  }
+  })
 );
 
 router.get(
   "/student/:dni/scores",
-  async (req: Request, res: Response, next: NextFunction) => {
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const { dni } = req.params;
 
     if (!dni) {
@@ -64,12 +65,12 @@ router.get(
     } catch (error) {
       next(error);
     }
-  }
+  })
 );
 
 router.get(
   "/student/:dni/courses",
-  async (req: Request, res: Response, next: NextFunction) => {
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const { dni } = req.params;
 
     if (!dni) {
@@ -89,12 +90,12 @@ router.get(
     } catch (error) {
       next(error);
     }
-  }
+  })
 );
 
 router.get(
   "/student/:dni/course-evolution",
-  async (req: Request, res: Response, next: NextFunction) => {
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const { dni } = req.params;
     const { course_code } = req.query;
 
@@ -120,12 +121,12 @@ router.get(
     } catch (error) {
       next(error);
     }
-  }
+  })
 );
 
 router.get(
   "/student/:dni/sections/:evalCode",
-  async (req: Request, res: Response, next: NextFunction) => {
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const { dni, evalCode } = req.params;
 
     if (!dni || !evalCode) {
@@ -139,7 +140,7 @@ router.get(
     } catch (error) {
       next(error);
     }
-  }
+  })
 );
 
 export default router;
