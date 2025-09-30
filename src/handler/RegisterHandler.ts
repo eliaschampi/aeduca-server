@@ -9,7 +9,7 @@ export const fetchBySection = async (req: Request, res: Response, next: NextFunc
       return;
     }
     const registers = await service.fetchBySection(section_code);
-    const values = registers.map((item: any) => ({
+    const values = registers.map((item) => ({
       ...item,
       profile: item.profile || {},
       online: false

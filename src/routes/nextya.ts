@@ -1,154 +1,145 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { NextyaService } from "../services/NextyaService";
 
 const router = Router();
 const nextyaService = new NextyaService();
 
-/**
- * GET /student/:dni/results
- * Returns all evaluation results for a student by DNI
- */
-router.get("/student/:dni/results", async (req: Request, res: Response) => {
-  const { dni } = req.params;
+router.get(
+  "/student/:dni/results",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { dni } = req.params;
 
-  if (!dni) {
-    return res.status(400).json({ error: "DNI no proporcionado" });
-  }
-
-  try {
-    const data = await nextyaService.getStudentResults(dni);
-    return res.json(data);
-  } catch (error) {
-    console.error("Error en endpoint de resultados del estudiante:", error);
-    return res.status(500).json({ error: "Error al obtener resultados del estudiante" });
-  }
-});
-
-/**
- * GET /student/:dni/answers/:evalCode
- * Returns student answers for a specific evaluation
- */
-router.get("/student/:dni/answers/:evalCode", async (req: Request, res: Response) => {
-  const { dni, evalCode } = req.params;
-
-  if (!dni || !evalCode) {
-    return res.status(400).json({ error: "DNI o código de evaluación no proporcionado" });
-  }
-
-  try {
-    const data = await nextyaService.getStudentAnswers(dni, evalCode);
-    return res.json(data);
-  } catch (error) {
-    console.error("Error en endpoint de respuestas del estudiante:", error);
-    return res.status(500).json({ error: "Error al obtener respuestas del estudiante" });
-  }
-});
-
-/**
- * GET /student/:dni/scores
- * Returns score evolution data for a student by DNI
- */
-router.get("/student/:dni/scores", async (req: Request, res: Response) => {
-  const { dni } = req.params;
-
-  if (!dni) {
-    return res.status(400).json({ error: "DNI no proporcionado" });
-  }
-
-  try {
-    const data = await nextyaService.getStudentScoreEvolution(dni);
-
-    if (!data) {
-      return res
-        .status(500)
-        .json({ error: "No se pudieron obtener datos de evolución de puntajes" });
+    if (!dni) {
+      res.status(400).json({ error: "DNI no proporcionado" });
+      return;
     }
 
-    return res.json(data);
-  } catch (error) {
-    console.error("Error en endpoint de evolución de puntajes:", error);
-    return res
-      .status(500)
-      .json({ error: "Error al procesar datos de evolución de puntajes" });
+    try {
+      const data = await nextyaService.getStudentResults(dni);
+      res.json(data);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
-/**
- * GET /student/:dni/courses
- * Returns course scores data for a student by DNI
- */
-router.get("/student/:dni/courses", async (req: Request, res: Response) => {
-  const { dni } = req.params;
+router.get(
+  "/student/:dni/answers/:evalCode",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { dni, evalCode } = req.params;
 
-  if (!dni) {
-    return res.status(400).json({ error: "DNI no proporcionado" });
-  }
-
-  try {
-    const data = await nextyaService.getStudentCourseScores(dni);
-
-    if (!data) {
-      return res.status(500).json({ error: "No se pudieron obtener datos de cursos" });
+    if (!dni || !evalCode) {
+      res.status(400).json({ error: "DNI o código de evaluación no proporcionado" });
+      return;
     }
 
-    return res.json(data);
-  } catch (error) {
-    console.error("Error en endpoint de scores de cursos:", error);
-    return res.status(500).json({ error: "Error al procesar datos de cursos" });
+    try {
+      const data = await nextyaService.getStudentAnswers(dni, evalCode);
+      res.json(data);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
-/**
- * GET /student/:dni/course-evolution
- * Returns course evolution data for a student by DNI, optional course_code query param
- */
-router.get("/student/:dni/course-evolution", async (req: Request, res: Response) => {
-  const { dni } = req.params;
-  const { course_code } = req.query;
+router.get(
+  "/student/:dni/scores",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { dni } = req.params;
 
-  if (!dni) {
-    return res.status(400).json({ error: "DNI no proporcionado" });
-  }
-
-  try {
-    const data = await nextyaService.getStudentCourseEvolution(
-      dni,
-      course_code as string
-    );
-
-    if (!data) {
-      return res
-        .status(500)
-        .json({ error: "No se pudieron obtener datos de evolución por curso" });
+    if (!dni) {
+      res.status(400).json({ error: "DNI no proporcionado" });
+      return;
     }
 
-    return res.json(data);
-  } catch (error) {
-    console.error("Error en endpoint de evolución por curso:", error);
-    return res
-      .status(500)
-      .json({ error: "Error al procesar datos de evolución por curso" });
+    try {
+      const data = await nextyaService.getStudentScoreEvolution(dni);
+      if (!data) {
+        res
+          .status(500)
+          .json({ error: "No se pudieron obtener datos de evolución de puntajes" });
+        return;
+      }
+      res.json(data);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
-/**
- * GET /student/:dni/sections/:evalCode
- * Returns section scores for a specific evaluation
- */
-router.get("/student/:dni/sections/:evalCode", async (req: Request, res: Response) => {
-  const { dni, evalCode } = req.params;
+router.get(
+  "/student/:dni/courses",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { dni } = req.params;
 
-  if (!dni || !evalCode) {
-    return res.status(400).json({ error: "DNI o código de evaluación no proporcionado" });
+    if (!dni) {
+      res.status(400).json({ error: "DNI no proporcionado" });
+      return;
+    }
+
+    try {
+      const data = await nextyaService.getStudentCourseScores(dni);
+
+      if (!data) {
+        res.status(500).json({ error: "No se pudieron obtener datos de cursos" });
+        return;
+      }
+
+      res.json(data);
+    } catch (error) {
+      next(error);
+    }
   }
+);
 
-  try {
-    const data = await nextyaService.getSectionScores(dni, evalCode);
-    return res.json(data);
-  } catch (error) {
-    console.error("Error en endpoint de secciones:", error);
-    return res.status(500).json({ error: "Error al obtener secciones" });
+router.get(
+  "/student/:dni/course-evolution",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { dni } = req.params;
+    const { course_code } = req.query;
+
+    if (!dni) {
+      res.status(400).json({ error: "DNI no proporcionado" });
+      return;
+    }
+
+    try {
+      const data = await nextyaService.getStudentCourseEvolution(
+        dni,
+        course_code as string
+      );
+
+      if (!data) {
+        res
+          .status(500)
+          .json({ error: "No se pudieron obtener datos de evolución por curso" });
+        return;
+      }
+
+      res.json(data);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
+
+router.get(
+  "/student/:dni/sections/:evalCode",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { dni, evalCode } = req.params;
+
+    if (!dni || !evalCode) {
+      res.status(400).json({ error: "DNI o código de evaluación no proporcionado" });
+      return;
+    }
+
+    try {
+      const data = await nextyaService.getSectionScores(dni, evalCode);
+      res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 export default router;

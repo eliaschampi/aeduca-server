@@ -1,8 +1,10 @@
 import { Model } from "objection";
 import Lesson from "./Lesson";
 import Register from "./Register";
+import File from "./File";
 
 class Response extends Model {
+  files?: File[];
   static get tableName(): string {
     return "response";
   }

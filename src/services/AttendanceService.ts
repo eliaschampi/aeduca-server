@@ -46,7 +46,7 @@ export async function store(attendance_request: {
   state: string;
   branch_code: number;
   entry_time: string;
-}){
+}) {
   const returning_values = await knex("attendance")
     .insert(attendance_request)
     .returning("*");

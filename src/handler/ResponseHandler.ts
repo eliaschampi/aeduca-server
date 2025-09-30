@@ -31,9 +31,9 @@ export const fetchByRegister = async (
       res.status(400).json({ message: "Parámetros inválidos" });
       return;
     }
-    const value: any = await rh.fetchByRegister(+lesson_code, register_code);
+    const value = await rh.fetchByRegister(+lesson_code, register_code);
     if (value?.files) {
-      const files = await byCodeIn(value.files);
+      const files = await byCodeIn(value.files.map((file) => file.code));
       value.files = files;
     }
     res.status(200).json({ value });
