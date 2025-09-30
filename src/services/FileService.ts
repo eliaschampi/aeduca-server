@@ -5,15 +5,15 @@ import FileShare from "../model/FileShare";
 import Person from "../model/Person";
 
 export const byCode = async (code: number): Promise<File | undefined> => {
-  return await File.query().findById(code);
+  return File.query().findById(code);
 };
 
 export const byCodeIn = async (codes: number[]): Promise<File[]> => {
-  return await File.query().whereIn("code", codes);
+  return File.query().whereIn("code", codes);
 };
 
 export const searchQuery = async (dni: string, query: string): Promise<File[]> => {
-  return await File.query()
+  return File.query()
     .where(raw(`dni = '${dni}' and name ilike '%${query}%'`))
     .limit(10);
 };
@@ -27,45 +27,42 @@ export const byUser = async (
   if (parent_code !== "null") filequery = `parent_code = ${parent_code}`;
   if (onlydir) filequery += " and type = 'dir'";
 
-  return await File.query().where(raw(filequery)).orderBy(raw("type != 'dir'"));
+  return File.query().where(raw(filequery)).orderBy(raw("type != 'dir'"));
 };
 
 export const recentOrHeavy = async (dni: string, mode: string): Promise<File[]> => {
   const orderby = mode === "recent" ? "created_at" : "size";
-  return await File.query()
+  return File.query()
     .where(raw(`dni = '${dni}' and type != 'dir' and ${notInTrash}`))
     .orderBy(orderby, "DESC")
     .limit(10);
 };
 
 export const trashes = async (dni: string): Promise<File[]> => {
-  return await File.query()
+  return File.query()
     .where("dni", dni)
     .where("parent_path", "/trash/")
     .orderBy("created_at", "DESC");
 };
 
 export const byTag = async (dni: string, tag: string): Promise<File[]> => {
-  return await File.query()
-    .where("dni", dni)
-    .where("tag", tag)
-    .orderBy("created_at", "DESC");
+  return File.query().where("dni", dni).where("tag", tag).orderBy("created_at", "DESC");
 };
 
 export const updateTag = async (code: number, tag: string): Promise<number> => {
-  return await File.query().findById(code).patch({
+  return File.query().findById(code).patch({
     tag
   });
 };
 
 export const sumSize = async (dni: string): Promise<File | undefined> => {
-  return await File.query().select(raw("sum(file.size) as sum")).findOne({
+  return File.query().select(raw("sum(file.size) as sum")).findOne({
     dni
   });
 };
 
 export const shareds = async (dni: string, section_code = ""): Promise<File[]> => {
-  return await File.query()
+  return File.query()
     .select([
       "file.*",
       Person.query()
@@ -94,7 +91,7 @@ export const shareds = async (dni: string, section_code = ""): Promise<File[]> =
 };
 
 export const sharedsByMe = async (dni: string): Promise<File[]> => {
-  return await File.query()
+  return File.query()
     .select([
       "file.*",
       raw(`(
@@ -115,13 +112,13 @@ export const sharedsByMe = async (dni: string): Promise<File[]> => {
 };
 
 export const store = async (file: Record<string, unknown>): Promise<File> => {
-  return await File.query().insert(file);
+  return File.query().insert(file);
 };
 
 const update = async (trx: Transaction, file: any): Promise<number> => {
   const code = file.code;
   delete file.code;
-  return await trx
+  return trx
     .from("file")
     .update({ ...file })
     .where("code", code);
@@ -133,9 +130,10 @@ const updateParentPath = async (
   new_child_path: string,
   old_child_path: string
 ): Promise<any> => {
-  return await trx.raw(`
+  return trx.raw(`
         update file set parent_path = replace(parent_path, '${old_child_path}', '${new_child_path}')
-        where  dni = '${dni}' and parent_path like '${old_child_path}%'`);
+        where  dni = '${dni}' and parent_path like '${old_child_path}%'
+  `);
 };
 
 export const storeWithTransaction = async (
@@ -148,7 +146,7 @@ export const storeWithTransaction = async (
   joinedChildPath: Callvar,
   renameOrMove: Callvar
 ): Promise<boolean> => {
-  return await File.transaction(async (trx) => {
+  return File.transaction(async (trx) => {
     const { code, name, parent_path } = file_request;
     let file: any = null;
 
@@ -177,14 +175,14 @@ export const storeWithTransaction = async (
 export async function destroy(code: number, deleteDirOrFile: Callvar): Promise<number> {
   const value: any = await File.query().findById(code);
   await deleteDirOrFile(value);
-  return await File.query().deleteById(value.code);
+  return File.query().deleteById(value.code);
 }
 
 export const deleteTrash = async (
   dni: string,
   destroyTrashFiles: Callvar
 ): Promise<boolean> => {
-  return await File.transaction(async (tsx) => {
+  return File.transaction(async (tsx) => {
     await File.query(tsx).where("dni", dni).where("parent_path", "/trash/").delete();
 
     await destroyTrashFiles(dni);

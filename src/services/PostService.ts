@@ -85,12 +85,7 @@ class PostService {
   /**
    * Get posts for a specific user's feed
    */
-  getUserFeed(
-    dni: string,
-    section_code: string,
-    limit = 20,
-    offset = 0
-  ) {
+  getUserFeed(dni: string, section_code: string, limit = 20, offset = 0) {
     return this.getPosts({
       dni,
       section_code,
@@ -161,10 +156,7 @@ class PostService {
   /**
    * Create post with transaction
    */
-  createWithTransaction(
-    postData: Partial<IPost>,
-    fileCodes: number[]
-  ) {
+  createWithTransaction(postData: Partial<IPost>, fileCodes: number[]) {
     return PostModel.transaction(async (trx: Transaction) => {
       // Get file details
       let files: IPostAttachment[] = [];
