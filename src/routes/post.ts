@@ -1,5 +1,5 @@
 import { Router } from "express";
-import PostHandler from "../handler/PostHandler";
+import { getFeed, toggleCommentable } from "../handler/PostHandler";
 import verifyToken from "../middleware/verifyToken";
 
 const router = Router();
@@ -8,9 +8,9 @@ const router = Router();
 router.use(verifyToken); // Apply auth middleware to all routes below
 
 // Feed route
-router.get("/feed/:dni/:section_code?", PostHandler.getFeed);
+router.get("/feed/:dni/:section_code?", getFeed);
 
 // Toggle commentable (HTTP endpoint for non-realtime usage)
-router.patch("/:code/commentable/:dni", PostHandler.toggleCommentable);
+router.patch("/:code/commentable/:dni", toggleCommentable);
 
 export default router;

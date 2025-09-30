@@ -9,8 +9,8 @@ const urls = {
 };
 
 // Use descriptive variable names
-const clientUrl = process.env.CLIENT_URL || urls.aula;
-const webSocketOrigin = process.env.WEB_SOCKET_ORIGIN || urls.aula;
+const clientUrl = process.env.CLIENT_URL ?? urls.aula;
+const webSocketOrigin = process.env.WEB_SOCKET_ORIGIN ?? urls.aula;
 
 // Extract common parts of the CSP directives
 const commonSrc = [clientUrl, webSocketOrigin, "blob:", "data:"];

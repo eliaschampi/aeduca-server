@@ -67,7 +67,7 @@ export class ZipAFolder {
     }
 
     const output: WriteStream = fs.createWriteStream(targetFilePath);
-    const zipArchive: archiver.Archiver = archiver(format, archiverOptions || {});
+    const zipArchive: archiver.Archiver = archiver(format, archiverOptions ?? {});
 
     return new Promise((resolve, reject) => {
       output.on("close", resolve);

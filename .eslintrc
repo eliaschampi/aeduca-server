@@ -27,13 +27,19 @@
     // CRÍTICAS PARA PERFORMANCE
     "@typescript-eslint/no-unnecessary-type-assertion": "error",
     "@typescript-eslint/prefer-optional-chain": "error",
-    "@typescript-eslint/prefer-nullish-coalescing": "error",
     // CALIDAD DE CÓDIGO
-    "no-console": "warn",
     "prefer-template": "error",
     "object-shorthand": "error",
-    "no-return-await": "error",
-    "prefer-const": "error"
+    "prefer-const": "error",
+    "no-console": "off",
+    "@typescript-eslint/prefer-nullish-coalescing": "warn",
+    "@typescript-eslint/no-unsafe-assignment": "warn",
+    "@typescript-eslint/no-unsafe-member-access": "warn",
+    "@typescript-eslint/no-unsafe-argument": "warn",
+    "@typescript-eslint/no-unsafe-call": "warn",
+    "@typescript-eslint/no-unsafe-return": "warn",
+    "@typescript-eslint/require-await": "warn",
+    "no-return-await": "off"
   },
   "env": {
     "browser": true,

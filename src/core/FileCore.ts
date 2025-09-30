@@ -12,7 +12,7 @@ class FileCore {
 
   constructor() {
     // Default to '/drive' when STORAGE env variable is not provided
-    this.storageRoot = process.env.STORAGE || "/drive";
+    this.storageRoot = process.env.STORAGE ?? "/drive";
     this.ensureStorageRoot();
   }
 
@@ -337,7 +337,7 @@ class FileCore {
    */
   async getFileSize(entity: FileEntity): Promise<number> {
     const stats = await this.getStats(entity);
-    return stats?.size || 0;
+    return stats?.size ?? 0;
   }
 
   /**
