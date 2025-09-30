@@ -16,14 +16,14 @@ class CommentService {
       throw new Error("Comentarios deshabilitados para este post");
     }
 
-    return await CommentModel.query().insert(commentData);
+    return CommentModel.query().insert(commentData);
   }
 
   /**
    * Get a single comment by ID
    */
-  async getById(code: number): Promise<CommentModel | undefined> {
-    return await CommentModel.query()
+  getById(code: number) {
+    return CommentModel.query()
       .findById(code)
       .withGraphFetched("[from, replies(orderByCreated)]")
       .modifiers({
@@ -122,8 +122,8 @@ class CommentService {
   /**
    * Get all comments for a post (including replies)
    */
-  async getAllPostComments(post_code: number): Promise<CommentModel[]> {
-    return await CommentModel.query()
+  getAllPostComments(post_code: number) {
+    return CommentModel.query()
       .where("post_code", post_code)
       .orderBy("created_at", "desc");
   }
@@ -131,38 +131,26 @@ class CommentService {
   /**
    * Update a comment
    */
-  async update(code: number, updateData: Partial<IComment>): Promise<CommentModel> {
-    // Only allow updating message and updated_at
-    const allowedUpdates = {
-      message: updateData.message,
+  update(code: number, updateData: Partial<IComment>) {
+    return CommentModel.query().updateAndFetchById(code, {
+      message: updateData.message ?? "",
       updated_at: new Date()
-    };
-
-    return await CommentModel.query().updateAndFetchById(code, allowedUpdates);
+    });
   }
 
-  /**
-   * Delete a comment
-   */
-  async delete(code: number): Promise<number> {
-    // This will cascade delete all replies due to foreign key constraint
-    return await CommentModel.query().deleteById(code);
+  delete(code: number) {
+    return CommentModel.query().deleteById(code);
   }
 
-  /**
-   * Reply to a comment
-   */
   async replyToComment(
     comment_code: number,
     replyData: Partial<IComment>
   ): Promise<CommentModel> {
-    // Get original comment to verify it exists and get post_id
     const originalComment = await CommentModel.query().findById(comment_code);
     if (!originalComment) {
       throw new Error("Comentario original no encontrado");
     }
 
-    // Create reply with same post_id as original comment
     const replyPayload = {
       ...replyData,
       post_code: originalComment.post_code,

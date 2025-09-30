@@ -4,8 +4,8 @@ const ATTENDANCE_TABLE_NAME = "attendance";
 const INSPECTION_TABLE_NAME = "inspection";
 const CYCLE_TABLE_NAME = "cycle";
 
-export async function entryTime(cycle_code: string): Promise<any[]> {
-  return await knex
+export function entryTime(cycle_code: string) {
+  return knex
     .select(ATTENDANCE_TABLE_NAME)
     .from(CYCLE_TABLE_NAME)
     .where("code", cycle_code);
@@ -46,7 +46,7 @@ export async function store(attendance_request: {
   state: string;
   branch_code: number;
   entry_time: string;
-}): Promise<any> {
+}){
   const returning_values = await knex("attendance")
     .insert(attendance_request)
     .returning("*");
@@ -55,13 +55,13 @@ export async function store(attendance_request: {
   }
 }
 
-export async function fetchByEntity(
+export function fetchByEntity(
   entity_identifier: string,
   from: string,
   to: string,
   priority: number
-): Promise<any[]> {
-  return await knex
+) {
+  return knex
     .select("attendance.*", "justification.*")
     .from(ATTENDANCE_TABLE_NAME)
     .leftJoin("justification", "attendance.code", "justification.attendance_code")
@@ -71,11 +71,11 @@ export async function fetchByEntity(
     .orderBy("attendance.created_at", "desc");
 }
 
-export async function sendPermise(permision_data: {
+export function sendPermise(permision_data: {
   description: string;
   branch_code: number;
-}): Promise<number[]> {
-  return await knex(INSPECTION_TABLE_NAME).insert({
+}) {
+  return knex(INSPECTION_TABLE_NAME).insert({
     state: "p",
     inspection_type: "p",
     ...permision_data

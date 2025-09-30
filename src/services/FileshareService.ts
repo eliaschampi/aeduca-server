@@ -2,7 +2,7 @@ import { raw, ref } from "objection";
 import FileShare, { IFileShare } from "../model/FileShare";
 import Person from "../model/Person";
 
-export function sharedEntities(file_code: number){
+export function sharedEntities(file_code: number) {
   return FileShare.query()
     .select([
       "fileshare.*",
@@ -17,10 +17,10 @@ export function sharedEntities(file_code: number){
 }
 
 //
-export function store(fileshare: IFileShare){
+export function store(fileshare: IFileShare) {
   return FileShare.query().insert(fileshare).returning("*");
 }
 
-export function remove(code: number){
+export function remove(code: number) {
   return FileShare.query().deleteById(code);
 }

@@ -1,7 +1,7 @@
 import { knex } from "../con/KnexConection";
 import Student from "../model/Student";
 
-export function fetchSupport(from: string, type: string)   {
+export function fetchSupport(from: string, type: string) {
   return knex
     .select()
     .from("support")
