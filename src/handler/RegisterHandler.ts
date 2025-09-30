@@ -11,7 +11,7 @@ export const fetchBySection = async (req: Request, res: Response, next: NextFunc
     const registers = await service.fetchBySection(section_code);
     const values = registers.map((item) => ({
       ...item,
-      profile: item.profile || {},
+      profile: item.profile ?? {},
       online: false
     }));
     res.status(200).json({ values });

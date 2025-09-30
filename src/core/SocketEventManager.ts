@@ -49,11 +49,11 @@ async function authenticate(socket: Socket, dni?: string) {
   if (!dni) {
     throw new Error("Identificador de usuario requerido");
   }
-  socket.data.dni = dni;
-  socket.join(`user:${dni}`);
-  socket.join("aud:all");
 
   try {
+    socket.data.dni = dni;
+    socket.join(`user:${dni}`);
+    socket.join("aud:all");
     const sections = await Register.query()
       .select("section_code")
       .where("student_dni", dni);

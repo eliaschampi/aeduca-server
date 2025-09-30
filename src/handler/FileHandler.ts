@@ -347,7 +347,7 @@ export const updateTag = async (
 ): Promise<void> => {
   try {
     const { code, tag } = req.body;
-    const value = updateTagService(code, tag);
+    const value = await updateTagService(code, tag);
     res.status(201).json({
       message: "Etiqueta modificada",
       value
@@ -418,7 +418,7 @@ export const update = async (
     await storeWithTransaction(
       { code, name: newName, parent_path: newParentPath, parent_code },
       joinedChildPath,
-      async () => true // FileCore already handled the rename
+      () => true // FileCore already handled the rename
     );
 
     const message =
@@ -495,7 +495,7 @@ export const moveToTrash = async (
     await storeWithTransaction(
       { code: +code, name: file.name, parent_path: "/trash/" },
       () => ({ old_child_path: "", new_child_path: "" }),
-      async () => true
+      () => true
     );
 
     res.status(200).json({ message: "Archivo movido a la papelera exitosamente" });

@@ -3,7 +3,7 @@ import knexConstructor, { Knex } from "knex";
 export let nextyaKnex: Knex<any, unknown[]>;
 
 const HOST = process.env.NEXTYA_DB_HOST ?? "localhost";
-const PORT = Number(process.env.NEXTYA_DB_PORT || 5432);
+const PORT = Number(process.env.NEXTYA_DB_PORT ?? 5432);
 const DATABASE = process.env.NEXTYA_DB_NAME ?? "nextya";
 const USER = process.env.NEXTYA_DB_USER ?? "nextya";
 const PASSWORD = process.env.NEXTYA_DB_PASSWORD ?? "nextya";

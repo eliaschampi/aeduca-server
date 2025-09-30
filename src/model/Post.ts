@@ -119,12 +119,12 @@ class PostModel extends Model {
 
   // Helper method to check if a user has liked the post
   hasLiked(dni: string): boolean {
-    return this.likes?.includes(dni) || false;
+    return this.likes?.includes(dni) ?? false;
   }
 
   // Helper method to check if a user has saved the post
   hasSaved(dni: string): boolean {
-    return this.savelist?.includes(dni) || false;
+    return this.savelist?.includes(dni) ?? false;
   }
 
   // Helper method to toggle like
