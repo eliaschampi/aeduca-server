@@ -19,19 +19,19 @@ class PostService {
   /**
    * Create a new post
    */
-  async create(postData: Partial<IPost>): Promise<PostModel> {
-    return await PostModel.query().insert(postData);
+  create(postData: Partial<IPost>) {
+    return PostModel.query().insert(postData);
   }
 
   /**
    * Get a single post by ID
    */
-  async getById(code: number): Promise<PostModel | undefined> {
-    return await PostModel.query()
+  getById(code: number) {
+    return PostModel.query()
       .findById(code)
       .withGraphFetched("[creator, comments(orderByCreated)]")
       .modifiers({
-        orderByCreated(builder: any) {
+        orderByCreated(builder) {
           builder.orderBy("created_at", "desc");
         }
       });
@@ -55,7 +55,7 @@ class PostService {
       query = query.where(function () {
         this.where("post.creator_dni", filters.dni!)
           .orWhereRaw("? = ANY(post.share_with)", ["all"])
-          .orWhereRaw("? = ANY(post.share_with)", [filters.section_code || ""]);
+          .orWhereRaw("? = ANY(post.share_with)", [filters.section_code ?? ""]);
       });
     }
 
@@ -85,13 +85,13 @@ class PostService {
   /**
    * Get posts for a specific user's feed
    */
-  async getUserFeed(
+  getUserFeed(
     dni: string,
     section_code: string,
     limit = 20,
     offset = 0
-  ): Promise<PostWithStats[]> {
-    return await this.getPosts({
+  ) {
+    return this.getPosts({
       dni,
       section_code,
       limit,
@@ -102,15 +102,15 @@ class PostService {
   /**
    * Update a post
    */
-  async update(code: number, updateData: Partial<IPost>): Promise<PostModel> {
-    return await PostModel.query().updateAndFetchById(code, updateData);
+  update(code: number, updateData: Partial<IPost>) {
+    return PostModel.query().updateAndFetchById(code, updateData);
   }
 
   /**
    * Delete a post
    */
-  async delete(code: number): Promise<number> {
-    return await PostModel.query().deleteById(code);
+  delete(code: number) {
+    return PostModel.query().deleteById(code);
   }
 
   /**
@@ -153,19 +153,19 @@ class PostService {
     };
   }
 
-  async toggleCommentable(post: PostModel): Promise<PostModel> {
-    return await PostModel.query().patchAndFetchById(post.code, {
+  toggleCommentable(post: PostModel) {
+    return PostModel.query().patchAndFetchById(post.code, {
       commentable: !post.commentable
     });
   }
   /**
    * Create post with transaction
    */
-  async createWithTransaction(
+  createWithTransaction(
     postData: Partial<IPost>,
     fileCodes: number[]
-  ): Promise<PostModel> {
-    return await PostModel.transaction(async (trx: Transaction) => {
+  ) {
+    return PostModel.transaction(async (trx: Transaction) => {
       // Get file details
       let files: IPostAttachment[] = [];
       if (fileCodes.length > 0) {
@@ -180,12 +180,10 @@ class PostService {
       }
 
       // Create post with files
-      const post = await PostModel.query(trx).insert({
+      return PostModel.query(trx).insert({
         ...postData,
         files
       });
-
-      return post;
     });
   }
 }

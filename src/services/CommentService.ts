@@ -157,7 +157,7 @@ class CommentService {
       reply_to_code: comment_code
     };
 
-    return await this.create(replyPayload);
+    return this.create(replyPayload);
   }
 }
 

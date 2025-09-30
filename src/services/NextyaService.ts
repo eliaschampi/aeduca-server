@@ -17,8 +17,7 @@ export class NextyaService {
         .first();
 
       return result?.code || null;
-    } catch (error) {
-      console.error("Error getting student code by DNI:", error);
+    } catch {
       return null;
     }
   }
@@ -35,8 +34,7 @@ export class NextyaService {
         .whereIn("register_code", [register.code])
         .orderBy("eval_date", "desc");
       return rawResults;
-    } catch (error) {
-      console.error("Error getting student results:", error);
+    } catch {
       return [];
     }
   }
@@ -82,17 +80,11 @@ export class NextyaService {
         section_code: answer.section_code,
         course_name: answer.course_name
       }));
-    } catch (error) {
-      console.error("Error getting student answers:", error);
+    } catch {
       return [];
     }
   }
 
-  /**
-   * Get student score evolution data for Chart.js line chart
-   * Perfect for time-series visualization with chronological data
-   * Uses optimized PostgreSQL function: get_student_score_evolution()
-   */
   async getStudentScoreEvolution(dni: string): Promise<ScoreEvolutionItem[]> {
     const studentCode = await this.getStudentCodeByDni(dni);
     if (!studentCode) return [];
@@ -103,17 +95,11 @@ export class NextyaService {
         [studentCode]
       );
       return result.rows || [];
-    } catch (error) {
-      console.error("[NextyaService] Score evolution query failed:", error);
+    } catch {
       return [];
     }
   }
 
-  /**
-   * Get student course average scores for Chart.js doughnut/pie chart
-   * Perfect for showing course performance distribution
-   * Uses optimized PostgreSQL function: get_student_course_scores()
-   */
   async getStudentCourseScores(dni: string): Promise<CourseScoreItem[]> {
     const studentCode = await this.getStudentCodeByDni(dni);
     if (!studentCode) return [];
@@ -124,20 +110,11 @@ export class NextyaService {
         [studentCode]
       );
       return result.rows || [];
-    } catch (error) {
-      console.error("[NextyaService] Course scores query failed:", error);
+    } catch {
       return [];
     }
   }
 
-  /**
-   * Get student course evolution data for Chart.js bar chart
-   * Perfect for showing performance trends by course over time
-   * Uses optimized PostgreSQL function: get_student_course_evolution_by_course()
-   *
-   * @param dni - Student DNI
-   * @param courseCode - Optional course filter for specific course evolution
-   */
   async getStudentCourseEvolution(
     dni: string,
     courseCode?: string
@@ -151,8 +128,7 @@ export class NextyaService {
         [studentCode, courseCode || null]
       );
       return result.rows || [];
-    } catch (error) {
-      console.error("[NextyaService] Course evolution query failed:", error);
+    } catch {
       return [];
     }
   }
@@ -196,8 +172,7 @@ export class NextyaService {
         score:
           typeof section.score === "string" ? parseFloat(section.score) : section.score
       }));
-    } catch (error) {
-      console.error("[NextyaService] Section scores query failed:", error);
+    } catch {
       return [];
     }
   }

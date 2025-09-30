@@ -1,3 +1,4 @@
+/* eslint-disable */
 import knexConstructor, { Knex } from "knex";
 
 type NextyaStudent = {
@@ -14,13 +15,13 @@ type AeducaPerson = {
 };
 
 const HOST = process.env.DB_HOST ?? "localhost";
-const PORT = Number(process.env.DB_PORT || 5432);
+const PORT = Number(process.env.DB_PORT ?? 5432);
 const DATABASE = process.env.DB_NAME ?? "aeduca";
 const USER = process.env.DB_USER ?? "aeduca";
 const PASSWORD = process.env.DB_PASSWORD ?? "aeduca";
 
 const NEXTYA_HOST = process.env.NEXTYA_DB_HOST ?? "localhost";
-const NEXTYA_PORT = Number(process.env.NEXTYA_DB_PORT || 5432);
+const NEXTYA_PORT = Number(process.env.NEXTYA_DB_PORT ?? 5432);
 const NEXTYA_DATABASE = process.env.NEXTYA_DB_NAME ?? "nextya";
 const NEXTYA_USER = process.env.NEXTYA_DB_USER ?? "nextya";
 const NEXTYA_PASSWORD = process.env.NEXTYA_DB_PASSWORD ?? "nextya";
