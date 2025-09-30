@@ -19,7 +19,7 @@ export const fetchByDNI = (dni: string): QueryBuilder<Person, Person | undefined
     .withGraphFetched("[profile(only)]")
     .modifiers({
       only(builder) {
-        builder.select("image", "password", "description", "last_logout");
+        void builder.select("image", "password", "description", "last_logout");
       }
     })
     .findById(dni);
@@ -31,7 +31,7 @@ export const fetchPersonsByDNIS = (dnis: string): QueryBuilder<Person, Person[]>
     .withGraphFetched("[profile(only)]")
     .modifiers({
       only(builder) {
-        builder.select("image", "description");
+        void builder.select("image", "description");
       }
     })
     .whereIn("dni", dnis.split("_"));

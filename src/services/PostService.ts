@@ -32,7 +32,7 @@ class PostService {
       .withGraphFetched("[creator, comments(orderByCreated)]")
       .modifiers({
         orderByCreated(builder) {
-          builder.orderBy("created_at", "desc");
+          void builder.orderBy("created_at", "desc");
         }
       });
   }
@@ -53,7 +53,7 @@ class PostService {
     if (filters.dni) {
       // Get posts visible to this user
       query = query.where(function () {
-        this.where("post.creator_dni", filters.dni!)
+        void this.where("post.creator_dni", filters.dni!)
           .orWhereRaw("? = ANY(post.share_with)", ["all"])
           .orWhereRaw("? = ANY(post.share_with)", [filters.section_code ?? ""]);
       });

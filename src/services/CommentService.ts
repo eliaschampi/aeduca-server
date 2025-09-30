@@ -28,7 +28,7 @@ class CommentService {
       .withGraphFetched("[from, replies(orderByCreated)]")
       .modifiers({
         orderByCreated(builder) {
-          builder.orderBy("created_at", "desc");
+          void builder.orderBy("created_at", "desc");
         }
       });
   }

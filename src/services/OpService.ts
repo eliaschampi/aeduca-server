@@ -9,7 +9,7 @@ export function bySection(section_code: string) {
     .withGraphFetched("[course, person(personCustom)]")
     .modifiers({
       personCustom(builder) {
-        builder.select("dni", "name", "lastname");
+        void builder.select("dni", "name", "lastname");
       }
     })
     .whereRaw(`'${section_code}|all' ~* any(sts)`);

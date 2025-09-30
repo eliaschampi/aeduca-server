@@ -25,10 +25,10 @@ export function fetchBySection(section_code: string): QueryBuilder<Register, Reg
     .withGraphJoined("profile(onlyProfile)")
     .modifiers({
       onlyPerson(builder) {
-        builder.select("name", "lastname");
+        void builder.select("name", "lastname");
       },
       onlyProfile(builder) {
-        builder.select("image", "description", "last_logout");
+        void builder.select("image", "description", "last_logout");
       }
     })
     .where("section_code", section_code);
