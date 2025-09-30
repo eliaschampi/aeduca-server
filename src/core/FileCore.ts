@@ -185,10 +185,12 @@ class FileCore {
         };
       }
 
+      const newParentPathString = (newParentPath !== undefined ? newParentPath : entity.parent_path) as string;
+
       const newEntity = {
         ...entity,
         name: newName,
-        parent_path: newParentPath !== undefined ? newParentPath : entity.parent_path
+        parent_path: newParentPathString
       };
 
       const newPath = this.getFullPath(newEntity);

@@ -17,7 +17,7 @@ export type ZipAFolderOptions = {
 export class ZipAFolder {
   static async zip(
     srcFolder: string,
-    zipFilePath: string | undefined
+    zipFilePath: string
   ): Promise<void | Error> {
     const o: ZipAFolderOptions = {
       compression: COMPRESSION_LEVEL.high
@@ -53,7 +53,7 @@ export class ZipAFolder {
     archiverOptions
   }: {
     srcFolder: string;
-    targetFilePath?: string;
+    targetFilePath: string;
     format: archiver.Format;
     archiverOptions?: archiver.ArchiverOptions;
   }): Promise<void | Error> {

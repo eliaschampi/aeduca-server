@@ -13,16 +13,28 @@ type AeducaPerson = {
   lastname: string;
 };
 
+const HOST = process.env.DB_HOST ?? "localhost";
+const PORT = Number(process.env.DB_PORT || 5432);
+const DATABASE = process.env.DB_NAME ?? "aeduca";
+const USER = process.env.DB_USER ?? "aeduca";
+const PASSWORD = process.env.DB_PASSWORD ?? "aeduca";
+
+const NEXTYA_HOST = process.env.NEXTYA_DB_HOST ?? "localhost";
+const NEXTYA_PORT = Number(process.env.NEXTYA_DB_PORT || 5432);
+const NEXTYA_DATABASE = process.env.NEXTYA_DB_NAME ?? "nextya";
+const NEXTYA_USER = process.env.NEXTYA_DB_USER ?? "nextya";
+const NEXTYA_PASSWORD = process.env.NEXTYA_DB_PASSWORD ?? "nextya";
+
 async function populateDni() {
   // Aeduca DB connection
   const aeducaKnex: Knex = knexConstructor({
     client: "pg",
     connection: {
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT),
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD
+      host: HOST,
+      port: PORT,
+      database: DATABASE,
+      user: USER,
+      password: PASSWORD
     }
   });
 
@@ -30,11 +42,11 @@ async function populateDni() {
   const nextyaKnex: Knex = knexConstructor({
     client: "pg",
     connection: {
-      host: process.env.NEXTYA_DB_HOST,
-      port: Number(process.env.NEXTYA_DB_PORT || 5432),
-      database: process.env.NEXTYA_DB_NAME,
-      user: process.env.NEXTYA_DB_USER,
-      password: process.env.NEXTYA_DB_PASSWORD
+      host: NEXTYA_HOST,
+      port: NEXTYA_PORT,
+      database: NEXTYA_DATABASE,
+      user: NEXTYA_USER,
+      password: NEXTYA_PASSWORD
     }
   });
 
@@ -53,13 +65,15 @@ async function populateDni() {
         .where("name", student.name)
         .andWhere("lastname", student.last_name);
 
-      if (matches.length === 1) {
+      const [match] = matches;
+
+      if (matches.length === 1 && match) {
         // Unique match, update DNI
         await nextyaKnex("students")
           .where("code", student.code)
-          .update({ dni: matches[0].dni });
+          .update({ dni: match.dni });
         console.log(
-          `Updated student ${student.name} ${student.last_name} with DNI ${matches[0].dni}`
+          `Updated student ${student.name} ${student.last_name} with DNI ${match.dni}`
         );
       } else if (matches.length === 0) {
         console.log(`No match found for student ${student.name} ${student.last_name}`);
