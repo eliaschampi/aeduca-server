@@ -1,8 +1,5 @@
 import { Router } from "express";
-import {
-  updateDescription,
-  updatePassword
-} from "../handler/ProfileHandler";
+import { updateDescription, updatePassword } from "../handler/ProfileHandler";
 
 const router = Router();
 

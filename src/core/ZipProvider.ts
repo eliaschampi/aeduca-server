@@ -15,10 +15,7 @@ export type ZipAFolderOptions = {
 };
 
 export class ZipAFolder {
-  static async zip(
-    srcFolder: string,
-    zipFilePath: string
-  ): Promise<void | Error> {
+  static async zip(srcFolder: string, zipFilePath: string): Promise<void | Error> {
     const o: ZipAFolderOptions = {
       compression: COMPRESSION_LEVEL.high
     };
@@ -57,7 +54,7 @@ export class ZipAFolder {
     format: archiver.Format;
     archiverOptions?: archiver.ArchiverOptions;
   }): Promise<void | Error> {
-    const targetBasePath: string = path.dirname(<string>targetFilePath);
+    const targetBasePath: string = path.dirname(targetFilePath);
 
     if (targetBasePath === srcFolder) {
       throw new Error("Fuente y destino deben ser diferentes.");
@@ -69,7 +66,7 @@ export class ZipAFolder {
       throw new Error(`Permission error: ${Error(<string>error).message}`);
     }
 
-    const output: WriteStream = fs.createWriteStream(<string>targetFilePath);
+    const output: WriteStream = fs.createWriteStream(targetFilePath);
     const zipArchive: archiver.Archiver = archiver(format, archiverOptions || {});
 
     return new Promise((resolve, reject) => {

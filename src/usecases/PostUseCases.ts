@@ -39,12 +39,18 @@ export async function createPost({ dni, payload }: PostCreateInput) {
   const data: Partial<IPost> = {
     content: payload.content,
     commentable: payload.commentable !== false,
-    link: payload.link,
     creator_dni: dni,
     creator_name: `${creator.name} ${creator.lastname}`.trim(),
-    creator_image: creator.image ?? undefined,
     share_with: ensureShareWith(payload.share_with)
   };
+
+  if (payload.link !== undefined) {
+    data.link = payload.link;
+  }
+
+  if (creator.image) {
+    data.creator_image = creator.image;
+  }
 
   const post =
     payload.files && payload.files.length > 0
@@ -151,12 +157,21 @@ export async function createComment({ dni, payload }: CommentCreateInput) {
     post_code: payload.post_code,
     from_dni: dni,
     from_name: `${commenter.name} ${commenter.lastname}`.trim(),
-    from_image: commenter.image ?? undefined,
     message: payload.message,
-    reply_to_code: payload.reply_to_code,
-    content_type: payload.content_type ?? "text",
-    url: payload.url
+    content_type: payload.content_type ?? "text"
   };
+
+  if (commenter.image) {
+    commentData.from_image = commenter.image;
+  }
+
+  if (payload.reply_to_code !== undefined) {
+    commentData.reply_to_code = payload.reply_to_code;
+  }
+
+  if (payload.url !== undefined) {
+    commentData.url = payload.url;
+  }
 
   const comment = await CommentService.create(commentData);
 
@@ -193,11 +208,17 @@ export async function replyToComment({ dni, code, payload }: CommentReplyInput) 
   const replyData: Partial<IComment> = {
     from_dni: dni,
     from_name: `${commenter.name} ${commenter.lastname}`.trim(),
-    from_image: commenter.image ?? undefined,
     message: payload.message,
-    content_type: payload.content_type ?? "text",
-    url: payload.url
+    content_type: payload.content_type ?? "text"
   };
+
+  if (commenter.image) {
+    replyData.from_image = commenter.image;
+  }
+
+  if (payload.url !== undefined) {
+    replyData.url = payload.url;
+  }
 
   const reply = await CommentService.replyToComment(code, replyData);
   emitReplyCreated(reply);

@@ -1,10 +1,13 @@
 import { Model } from "objection";
 import Lesson from "./Lesson";
 import Register from "./Register";
-import File from "./File";
 
 class Response extends Model {
-  files?: File[];
+  lesson_code!: number;
+  register_code!: string;
+  response_message?: string;
+  received?: boolean;
+  files?: number[];
   static get tableName(): string {
     return "response";
   }
