@@ -19,7 +19,7 @@ services:
       - STORAGE=${STORAGE}
     volumes:
       - .:/app
-      - /app/node_modules 
+      - /app/node_modules
       - ../drive:/drive
     networks:
       - main_aeduca-network

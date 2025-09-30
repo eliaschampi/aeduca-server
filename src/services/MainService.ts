@@ -1,26 +1,24 @@
 import { knex } from "../con/KnexConection";
 import Student from "../model/Student";
 
-export async function fetchSupport(from: string, type: string): Promise<any> {
-  const values = await knex
+export function fetchSupport(from: string, type: string)   {
+  return knex
     .select()
     .from("support")
     .where("from_dni", from)
-    .where("type", type);
-  if (values.length) {
-    return values[0];
-  }
+    .where("type", type)
+    .first();
 }
 
 //eslint-disable-next-line
-export const saveSupport = async (support: any): Promise<number[]> => {
-  return await knex("support").insert(support).onConflict("code").merge();
+export const saveSupport = (support: any) => {
+  return knex("support").insert(support).onConflict("code").merge();
 };
 
-export const coursesBySpe = async (): Promise<any[]> => {
+export const coursesBySpe = () => {
   return knex("course").select("name");
 };
 
-export async function branchByStudent(dni: string): Promise<Student | undefined> {
+export function branchByStudent(dni: string) {
   return Student.query().findById(dni);
 }

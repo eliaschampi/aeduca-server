@@ -8,8 +8,12 @@ export const fetchSharedEntities = async (
 ) => {
   try {
     const { file_code } = req.params;
+    if (!file_code) {
+      res.status(400).json({ message: "Código de archivo es requerido" });
+      return;
+    }
     const values = await sharedEntities(+file_code);
-    return res.status(200).send({ values });
+    res.status(200).json({ values });
   } catch (error) {
     next(error);
   }
@@ -18,9 +22,7 @@ export const fetchSharedEntities = async (
 export const storeFs = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const value: any = await store(req.body);
-    return res
-      .status(200)
-      .json({ message: "Se ha compartido con éxito", code: value.code });
+    res.status(200).json({ message: "Se ha compartido con éxito", code: value.code });
   } catch (error) {
     next(error);
   }
@@ -28,8 +30,13 @@ export const storeFs = async (req: Request, res: Response, next: NextFunction) =
 
 export const removeFs = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await remove(+req.params.code);
-    return res.status(200).json({ message: "Correctamente actualizado" });
+    const { code } = req.params;
+    if (!code) {
+      res.status(400).json({ message: "codigo no proporcionado" });
+      return;
+    }
+    await remove(+code);
+    res.status(200).json({ message: "Correctamente actualizado" });
   } catch (error) {
     next(error);
   }

@@ -1,21 +1,21 @@
 import Profile, { IProfile } from "../model/Profile";
 
-export const findById = async (dni: string): Promise<Profile | undefined> => {
-  return await Profile.query().findById(dni);
+export const findById = (dni: string) => {
+  return Profile.query().findById(dni);
 };
 
-export const getLastTime = async (dni: string): Promise<Profile | undefined> => {
-  return await Profile.query().select("last_logout").findById(dni);
+export const getLastTime = (dni: string) => {
+  return Profile.query().select("last_logout").findById(dni);
 };
 
-export const updateProfile = async (dni: string, p: IProfile): Promise<number> => {
-  return await Profile.query()
+export const updateProfile = (dni: string, profile: IProfile) => {
+  return Profile.query()
     .findById(dni)
     .patch({
-      ...p
+      ...profile
     });
 };
 
-export const updateLastLogout = async (dni: string): Promise<number> => {
-  return await updateProfile(dni, { last_logout: new Date() });
+export const updateLastLogout = (dni: string) => {
+  return updateProfile(dni, { last_logout: new Date() });
 };

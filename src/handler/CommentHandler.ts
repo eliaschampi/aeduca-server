@@ -1,14 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import CommentService from "../services/CommentService";
 
-/**
- * CommentHandler - Clean architecture for comment endpoints
- */
 class CommentHandler {
-  /**
-   * Get comments for a post
-   * GET /api/v1/comment/post/:post_code
-   */
   async getPostComments(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { post_code } = req.params;

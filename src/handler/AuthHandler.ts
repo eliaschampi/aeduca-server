@@ -14,24 +14,25 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     let mode = "docente";
 
     if (!dni || !reqPassword) {
-      return res.status(404).send({ message: "Oh, campos ingresados son incorrectos" });
+      res.status(404).json({ message: "Oh, campos ingresados son incorrectos" });
+      return;
     }
 
     const person: any = await fetchByDNI(dni);
     console.log(person);
-    if (!person || !person.profile) {
-      return res
-        .status(404)
-        .send({ message: "Oh, no te encontramos en nuestro registro" });
+    if (!person?.profile) {
+      res.status(404).json({ message: "Oh, no te encontramos en nuestro registro" });
+      return;
     }
 
     const teacher: any = await fetchActiveTeacher(dni);
     if (!teacher) {
       register = await fetchActiveRegister(dni);
       if (!register) {
-        return res.status(404).send({
+        res.status(404).json({
           message: `Aeduca espera tu matrícula ${new Date().getFullYear()}`
         });
+        return;
       }
       mode = "estudiante";
     } else {
@@ -43,9 +44,10 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     const passwordIsValid = bcrypt.compareSync(reqPassword, password);
 
     if (!passwordIsValid) {
-      return res.status(401).send({
+      res.status(401).json({
         message: "Tu contraseña es incorrecta"
       });
+      return;
     }
 
     const secret = <Secret>process.env.JWT_KEY;
@@ -53,7 +55,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
       expiresIn: parseInt(<string>process.env.JWTTTL)
     });
 
-    return res.status(200).send({
+    res.status(200).json({
       ...person,
       mode,
       register,
@@ -75,9 +77,10 @@ export const recoverPassword = async (
     const person = await fetchByUniqueAttrs(email, dni);
 
     if (!person) {
-      return res
+      res
         .status(500)
-        .send({ message: "Tu correo o dni no coincide con nuestro registro" });
+        .json({ message: "Tu correo o dni no coincide con nuestro registro" });
+      return;
     }
 
     const newCode = `MT22${Math.floor(Math.random() * 9999) + 1000}`;
@@ -86,12 +89,13 @@ export const recoverPassword = async (
     mailService.sendRecoverPassword(newCode, req.body.email, async (err: any) => {
       if (err) {
         console.log(err);
-        return res
+        res
           .status(500)
-          .send({ message: "Oh! ocurrió un error no esperado, intenta mas tarde" });
+          .json({ message: "Oh! ocurrió un error no esperado, intenta mas tarde" });
+        return;
       }
       await updateProfile(dni, { password: bcrypt.hashSync(newCode) });
-      return res.status(200).json({
+      res.status(200).json({
         message:
           "Querido usuario. Revisa tu correo, te hemos enviado un mensaje con tu nueva clave."
       });

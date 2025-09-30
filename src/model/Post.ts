@@ -156,4 +156,68 @@ class PostModel extends Model {
   }
 }
 
+export type PostCreateInput = {
+  dni: string;
+  payload: {
+    content: string;
+    commentable?: boolean;
+    link?: string;
+    share_with?: string[];
+    files?: number[];
+  };
+};
+
+export type PostUpdateInput = {
+  dni: string;
+  code: number;
+  payload: {
+    content?: string;
+    commentable?: boolean;
+    link?: string;
+    share_with?: string[];
+  };
+};
+
+export type PostDeleteInput = {
+  dni: string;
+  code: number;
+};
+
+export type PostToggleReactionInput = {
+  code: number;
+  dni: string;
+};
+
+export type CommentCreateInput = {
+  dni: string;
+  payload: {
+    post_code: number;
+    message: string;
+    reply_to_code?: number;
+    content_type?: string;
+    url?: string;
+  };
+};
+
+export type CommentUpdateInput = {
+  dni: string;
+  code: number;
+  message: string;
+};
+
+export type CommentDeleteInput = {
+  dni: string;
+  code: number;
+};
+
+export type CommentReplyInput = {
+  dni: string;
+  code: number;
+  payload: {
+    message: string;
+    content_type?: string;
+    url?: string;
+  };
+};
+
 export default PostModel;

@@ -4,8 +4,12 @@ import { bySection, byTeacher } from "../services/ScheduleService";
 
 export const fetchBySection = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const values = await bySection(req.params.section_code);
-    return res.status(200).send({ values });
+    const { section_code } = req.params;
+    if (!section_code) {
+      return res.status(400).json({ error: "Código de sección es requerido" });
+    }
+    const values = await bySection(section_code);
+    return res.status(200).json({ values });
   } catch (error) {
     next(error);
   }
@@ -13,8 +17,12 @@ export const fetchBySection = async (req: Request, res: Response, next: NextFunc
 
 export const fetchByTeacher = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const values = shsDecorated(await byTeacher(req.params.teacher_dni));
-    return res.status(200).send({ values });
+    const { teacher_dni } = req.params;
+    if (!teacher_dni) {
+      return res.status(400).json({ error: "Dni es requerido" });
+    }
+    const values = shsDecorated(await byTeacher(teacher_dni));
+    return res.status(200).json({ values });
   } catch (error) {
     next(error);
   }

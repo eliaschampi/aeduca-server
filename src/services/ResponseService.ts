@@ -31,8 +31,8 @@ export function fetchByRegister(
   });
 }
 
-export async function sendActivity(registerData: IResponse): Promise<Response> {
-  return await Response.query().insert({
+export function sendActivity(registerData: IResponse): QueryBuilder<Response, Response> {
+  return Response.query().insert({
     lesson_code: registerData.lesson_code,
     register_code: registerData.register_code,
     response_message: registerData.response_message,

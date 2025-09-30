@@ -20,19 +20,18 @@ export const sendVerificationCode = async (
     const value = await fetchByEmail(req.body.email);
 
     if (value) {
-      return res
-        .status(422)
-        .send({ message: "El correo ingresado ya esta siendo usado" });
+      res.status(422).json({ message: "El correo ingresado ya esta siendo usado" });
+      return;
     }
 
     mailService.sendVerificationCode(String(newCode), req.body.email, (err: any) => {
       if (err) {
-        console.log(err);
-        return res
+        res
           .status(500)
-          .send({ message: "Oh! ocurrió un error no esperado, intenta mas tarde" });
+          .json({ message: "Oh! ocurrió un error no esperado, intenta mas tarde" });
+        return;
       }
-      return res.status(200).send({
+      res.status(200).json({
         code: newCode,
         message: "Te hemos enviado un código de verificación, revisa tu correo"
       });
@@ -49,8 +48,12 @@ export const fetchSupportByFromAndType = async (
 ) => {
   try {
     const { from, type } = req.params;
+    if (!from || !type) {
+      res.status(400).json({ message: "from y type son obligatorios" });
+      return;
+    }
     const value = await fetchSupport(from, type);
-    return res.status(200).send({ value });
+    res.status(200).json({ value });
   } catch (error) {
     next(error);
   }
@@ -72,7 +75,7 @@ export const fetchCoursesBySpe = async (
 ) => {
   try {
     const values = (await coursesBySpe()).map((c) => c.name.trim());
-    return res.status(200).send({ values });
+    res.status(200).json({ values });
   } catch (error) {
     next(error);
   }
@@ -81,8 +84,12 @@ export const fetchCoursesBySpe = async (
 export const fetchBranch = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { dni } = req.params;
+    if (!dni) {
+      res.status(400).json({ message: "dni no proporcionado" });
+      return;
+    }
     const value: any = await branchByStudent(dni);
-    return res.status(200).send({ value });
+    res.status(200).json({ value });
   } catch (error) {
     next(error);
   }

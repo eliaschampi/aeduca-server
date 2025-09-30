@@ -18,7 +18,7 @@ export const stsDecorated = (sts: string[]): string => {
   if (sts.length > 0) {
     let stext = "";
     const _s = sts[0];
-    stext = _s.length === 10 ? full(_s) : cycles[_s] || "General";
+    stext = _s?.length === 10 ? full(_s ?? "") : cycles[_s ?? ""] || "General";
     if (sts.length > 1) {
       return `${stext} y otros`;
     }

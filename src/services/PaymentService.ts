@@ -1,38 +1,5 @@
 import { knex } from "../con/KnexConection";
-
-export type PaymentRecord = {
-  code: number;
-  register_code: string;
-  pcode: number;
-  description: string | null;
-  topay: string;
-  paid: string | null;
-  amount: number;
-  payment_type: string | null;
-};
-
-export type IncomeRecord = {
-  income_code: number;
-  series: string | null;
-  correlative: string;
-  type: string;
-  total_discount: number;
-  total: number;
-  state: boolean;
-  created_at: string;
-  updated_at: string;
-  cash_code: string;
-  details: Array<{
-    detail_code: number;
-    cashactiontype_code: number;
-    cashactiontype_name: string;
-    cashactiontype_mode: string;
-    title: string | null;
-    topay: number;
-    discount: number;
-    paid: number;
-  }>;
-};
+import { IncomeRecord, PaymentRecord } from "../model/Payment";
 
 /**
  * Fetches all manual payments for a specific register
@@ -84,7 +51,7 @@ export const fetchIncomesByRegister = async (
   }
 
   // Get income codes for detail query
-  const incomeCodes = incomes.map((income: any) => income.income_code);
+  const incomeCodes = incomes.map((income) => income.income_code);
 
   // Get all income details with cash action type info
   const details = await knex("income_detail as id")

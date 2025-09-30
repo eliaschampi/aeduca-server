@@ -19,8 +19,8 @@ export async function fetchPersonSummary(dni: string): Promise<PersonSummary> {
   }
 
   return {
-    name: (person as any).name,
-    lastname: (person as any).lastname,
-    image: (person as any).image ?? null
+    name: person.name ?? "",
+    lastname: person.lastname ?? "",
+    image: person.image ?? null
   };
 }

@@ -2,8 +2,8 @@ import { raw, ref } from "objection";
 import FileShare, { IFileShare } from "../model/FileShare";
 import Person from "../model/Person";
 
-export async function sharedEntities(file_code: number): Promise<FileShare[]> {
-  return await FileShare.query()
+export function sharedEntities(file_code: number){
+  return FileShare.query()
     .select([
       "fileshare.*",
       Person.query()
@@ -17,10 +17,10 @@ export async function sharedEntities(file_code: number): Promise<FileShare[]> {
 }
 
 //
-export async function store(fileshare: IFileShare): Promise<FileShare> {
-  return await FileShare.query().insert(fileshare).returning("*");
+export function store(fileshare: IFileShare){
+  return FileShare.query().insert(fileshare).returning("*");
 }
 
-export async function remove(code: number): Promise<number> {
-  return await FileShare.query().deleteById(code);
+export function remove(code: number){
+  return FileShare.query().deleteById(code);
 }

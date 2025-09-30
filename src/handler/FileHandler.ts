@@ -34,6 +34,10 @@ class FileHandler {
   async fetchByCode(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
+      if (!code) {
+        res.status(400).json({ message: "Código es requerido" });
+        return;
+      }
       const value = await byCode(parseInt(code));
 
       if (!value) {
@@ -54,6 +58,10 @@ class FileHandler {
   async search(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { dni, query } = req.params;
+      if (!dni || !query) {
+        res.status(400).json({ message: "Campos dni y query son requeridos" });
+        return;
+      }
       const values = await searchQuery(dni, query);
       res.status(200).json({ values });
     } catch (error) {
@@ -68,7 +76,10 @@ class FileHandler {
   async fetchByUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { dni, parent_code, onlydir } = req.params;
-
+      if (!dni || !parent_code) {
+        res.status(400).json({ message: "Campos dni y parent_code son requeridos" });
+        return;
+      }
       // Ensure user directory exists
       await FileCore.ensureUserDirectory(dni);
 
@@ -90,6 +101,10 @@ class FileHandler {
   ): Promise<void> {
     try {
       const { dni, mode } = req.params;
+      if (!dni || !mode) {
+        res.status(400).json({ message: "Campos dni y mode son requeridos" });
+        return;
+      }
       const values = await recentOrHeavy(dni, mode);
       res.status(200).json({ values });
     } catch (error) {
@@ -104,6 +119,10 @@ class FileHandler {
   async fetchByTrash(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { dni } = req.params;
+      if (!dni) {
+        res.status(400).json({ message: "Campo dni es requerido" });
+        return;
+      }
       const values = await trashes(dni);
       res.status(200).json({ values });
     } catch (error) {
@@ -118,6 +137,10 @@ class FileHandler {
   async fetchByTag(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { dni, tag } = req.params;
+      if (!dni || !tag) {
+        res.status(400).json({ message: "Campos dni y tag son requeridos" });
+        return;
+      }
       const values = await byTag(dni, tag);
       res.status(200).json({ values });
     } catch (error) {
@@ -132,7 +155,10 @@ class FileHandler {
   async fetchSumSize(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { dni } = req.params;
-
+      if (!dni) {
+        res.status(400).json({ message: "Campo dni es requerido" });
+        return;
+      }
       // Get from database
       const dbSize: any = await sumSize(dni);
 
@@ -160,6 +186,10 @@ class FileHandler {
   ): Promise<void> {
     try {
       const { dni, section_code } = req.params;
+      if (!dni || !section_code) {
+        res.status(400).json({ message: "Campos dni y section_code son requeridos" });
+        return;
+      }
       const values = await shareds(dni, section_code);
       res.status(200).json({ values });
     } catch (error) {
@@ -174,6 +204,10 @@ class FileHandler {
   async fetchSharedByMe(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { dni } = req.params;
+      if (!dni) {
+        res.status(400).json({ message: "Campo dni es requerido" });
+        return;
+      }
       const values = await sharedsByMe(dni);
       res.status(200).json({ values });
     } catch (error) {
@@ -213,7 +247,7 @@ class FileHandler {
    */
   async storeFile(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (!req.files || !req.files.file) {
+      if (!req.files?.file) {
         res.status(400).json({ message: "No se proporciono un archivo" });
         return;
       }
@@ -227,6 +261,10 @@ class FileHandler {
       // Determine file type based on extension
       const extension = path.extname(entityData.name).toLowerCase();
       const fileType = FileHandler.getFileType(extension);
+      if (!fileType) {
+        res.status(400).json({ message: "Tipo de archivo no soportado" });
+        return;
+      }
       entityData.type = fileType;
 
       // Upload file
@@ -344,6 +382,11 @@ class FileHandler {
     try {
       const { code } = req.params;
 
+      if (!code) {
+        res.status(400).json({ message: "Código es requerido" });
+        return;
+      }
+
       // Delete from filesystem and database
       await destroy(+code, async (entity: FileEntity) => {
         const result = await FileCore.delete(entity);
@@ -365,7 +408,10 @@ class FileHandler {
   async moveToTrash(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
-
+      if (!code) {
+        res.status(400).json({ message: "Código es requerido" });
+        return;
+      }
       // Get file details
       const file = await byCode(+code);
       if (!file) {
@@ -400,7 +446,10 @@ class FileHandler {
   async cleanTrash(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { dni } = req.params;
-
+      if (!dni) {
+        res.status(400).json({ message: "DNI es requerido" });
+        return;
+      }
       // Delete from database and filesystem
       await deleteTrash(dni, async () => {
         const result = await FileCore.emptyTrash(dni);
@@ -422,6 +471,10 @@ class FileHandler {
   async downloadFile(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.params;
+      if (!code) {
+        res.status(400).json({ message: "Código es requerido" });
+        return;
+      }
 
       const file = await byCode(+code);
       if (!file) {
@@ -460,6 +513,10 @@ class FileHandler {
   async streamVideo(req: Request, res: Response): Promise<void> {
     try {
       const { code } = req.params;
+      if (!code) {
+        res.sendStatus(404);
+        return;
+      }
 
       const file = await byCode(+code);
       if (!file) {
@@ -534,7 +591,10 @@ class FileHandler {
   async serveImage(req: Request, res: Response): Promise<void> {
     try {
       const { code } = req.params;
-
+      if (!code) {
+        res.sendStatus(404);
+        return;
+      }
       const file = await byCode(+code);
       if (!file) {
         res.sendStatus(404);

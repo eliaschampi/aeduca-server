@@ -4,7 +4,7 @@ import Profile from "./Profile";
 
 class Register extends Model {
   section_code?: string | null;
-
+  stext?: string | null;
   static tableName = "register";
 
   static get idColumn(): string {

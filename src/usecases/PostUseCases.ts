@@ -1,7 +1,17 @@
 import PostService from "../services/PostService";
 import CommentService from "../services/CommentService";
 import CommentModel, { IComment } from "../model/Comment";
-import { IPost } from "../model/Post";
+import {
+  CommentCreateInput,
+  CommentDeleteInput,
+  CommentReplyInput,
+  CommentUpdateInput,
+  IPost,
+  PostCreateInput,
+  PostDeleteInput,
+  PostToggleReactionInput,
+  PostUpdateInput
+} from "../model/Post";
 import {
   emitPostCreated,
   emitPostDeleted,
@@ -16,70 +26,6 @@ import {
   emitReplyCreated
 } from "../core/realtime/CommentRealtime";
 import { fetchPersonSummary } from "./shared/person";
-
-export type PostCreateInput = {
-  dni: string;
-  payload: {
-    content: string;
-    commentable?: boolean;
-    link?: string;
-    share_with?: string[];
-    files?: number[];
-  };
-};
-
-export type PostUpdateInput = {
-  dni: string;
-  code: number;
-  payload: {
-    content?: string;
-    commentable?: boolean;
-    link?: string;
-    share_with?: string[];
-  };
-};
-
-export type PostDeleteInput = {
-  dni: string;
-  code: number;
-};
-
-export type PostToggleReactionInput = {
-  code: number;
-  dni: string;
-};
-
-export type CommentCreateInput = {
-  dni: string;
-  payload: {
-    post_code: number;
-    message: string;
-    reply_to_code?: number;
-    content_type?: string;
-    url?: string;
-  };
-};
-
-export type CommentUpdateInput = {
-  dni: string;
-  code: number;
-  message: string;
-};
-
-export type CommentDeleteInput = {
-  dni: string;
-  code: number;
-};
-
-export type CommentReplyInput = {
-  dni: string;
-  code: number;
-  payload: {
-    message: string;
-    content_type?: string;
-    url?: string;
-  };
-};
 
 function ensureShareWith(share_with?: string[]): string[] {
   if (!share_with || share_with.length === 0) {

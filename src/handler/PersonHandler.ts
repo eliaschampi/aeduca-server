@@ -4,8 +4,12 @@ import { fetchPersonsByDNIS, finderQuery, updateEmail } from "../services/Person
 export const fetchLikers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { dnis } = req.params;
+    if (!dnis) {
+      res.status(400).json({ message: "Parámetros inválidos" });
+      return;
+    }
     const values = await fetchPersonsByDNIS(dnis);
-    return res.status(200).json({ values });
+    res.status(200).json({ values });
   } catch (error) {
     next(error);
   }
@@ -14,8 +18,12 @@ export const fetchLikers = async (req: Request, res: Response, next: NextFunctio
 export const finder = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { query } = req.params;
+    if (!query) {
+      res.status(400).json({ message: "Parámetros inválidos" });
+      return;
+    }
     const values = await finderQuery(query);
-    return res.status(200).json({ values });
+    res.status(200).json({ values });
   } catch (error) {
     next(error);
   }
@@ -24,8 +32,12 @@ export const finder = async (req: Request, res: Response, next: NextFunction) =>
 export const changeEmail = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { dni, email } = req.body;
+    if (!dni || !email) {
+      res.status(400).json({ message: "Parámetros inválidos" });
+      return;
+    }
     await updateEmail(dni, email);
-    return res.status(200).json({ message: "Correctamente modificado" });
+    res.status(200).json({ message: "Correctamente modificado" });
   } catch (error) {
     next(error);
   }

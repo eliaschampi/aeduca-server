@@ -1,14 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import * as paymentService from "../services/PaymentService";
 
-/**
- * Fetches manual payments for a specific register
- */
 export const fetchPaymentsByRegister = async (
   req: Request,
   res: Response,
   next: NextFunction
-): Promise<void> => {
+) => {
   try {
     const { register_code } = req.params;
 
@@ -31,14 +28,11 @@ export const fetchPaymentsByRegister = async (
   }
 };
 
-/**
- * Fetches income records with details for a specific register
- */
 export const fetchIncomesByRegister = async (
   req: Request,
   res: Response,
   next: NextFunction
-): Promise<void> => {
+) => {
   try {
     const { register_code } = req.params;
 

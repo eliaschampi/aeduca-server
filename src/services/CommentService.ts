@@ -111,7 +111,7 @@ class CommentService {
         replies: comment.replies.map((reply) => convertToModel(reply))
       };
 
-      return CommentModel.fromJson(payload) as CommentModel;
+      return CommentModel.fromJson(payload);
     };
 
     const paginated = topLevelComments.slice(start, end);

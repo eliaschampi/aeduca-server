@@ -1,7 +1,8 @@
+import { QueryBuilder } from "objection";
 import Schedule from "../model/Schedule";
 
-export async function bySection(section_code: string): Promise<Schedule[]> {
-  return await Schedule.query()
+export function bySection(section_code: string): QueryBuilder<Schedule, Schedule[]> {
+  return Schedule.query()
     .withGraphJoined("op.[course, person(personCustom)]")
     .modifiers({
       personCustom(builder) {
@@ -12,8 +13,8 @@ export async function bySection(section_code: string): Promise<Schedule[]> {
     .where("state", true);
 }
 
-export async function byTeacher(teacher_dni: string): Promise<Schedule[]> {
-  return await Schedule.query()
+export function byTeacher(teacher_dni: string): QueryBuilder<Schedule, Schedule[]> {
+  return Schedule.query()
     .withGraphJoined("op.[course]")
     .where("state", true)
     .where("op.teacher_dni", teacher_dni);

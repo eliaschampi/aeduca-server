@@ -18,9 +18,9 @@ config();
 
 const app = express();
 
-const port = parseInt(process.env.PORT || "3000");
-const cli_origin: string = process.env.CLIURL || "*";
-const api_url: string = process.env.API || "/api/v1";
+const port = parseInt(process.env.PORT ?? "3000");
+const cli_origin: string = process.env.CLIURL ?? "*";
+const api_url: string = process.env.API ?? "/api/v1";
 
 // CORS configuration
 app.use(
@@ -72,7 +72,7 @@ spa(app);
 // Start server
 server.listen(port, () => {
   console.log(`🚀 Aeduca Server running on port ${port}`);
-  console.log(`📦 Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log(`📦 Environment: ${process.env.NODE_ENV ?? "development"}`);
   console.log(`🔌 API URL: ${api_url}`);
   console.log(`✅ PostgreSQL connected`);
   console.log(`✅ Nextya PostgreSQL connected`);

@@ -10,10 +10,8 @@ export const fetchByIn = (codes: string[], section_code: string[]) => {
 };
 
 export const fetchActiveRegister = async (dni: string): Promise<Register | null> => {
-  const value: any = (
-    await Register.query().where("student_dni", dni).where("state", "a")
-  )[0];
-  if (value) {
+  const value = (await Register.query().where("student_dni", dni).where("state", "a"))[0];
+  if (value?.section_code) {
     value.stext = full(value.section_code);
     return value;
   }

@@ -12,21 +12,27 @@ import {
 
 export const fetchEntryData = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const values = await entryTime(req.params.cycle_code);
+    const { cycle_code } = req.params;
+    if (!cycle_code) {
+      res.status(400).json({ message: "Código de ciclo es requerido" });
+      return;
+    }
+    const values = await entryTime(cycle_code);
 
     let value = {};
 
     if (values.length !== 0) {
       const attendances = values[0].attendance;
       if (attendances.length === 1) {
-        return res.status(200).send({ value: attendances[0] });
+        res.status(200).json({ value: attendances[0] });
+        return;
       }
       value = attendances.find(
         (at: { order: number }) => at.order === (new Date().getHours() >= 12 ? 2 : 1)
       );
     }
 
-    return res.status(200).send({ value });
+    res.status(200).json({ value });
   } catch (error) {
     next(error);
   }
@@ -39,6 +45,10 @@ export const storeJustification = async (
 ) => {
   try {
     const { a_code } = req.params;
+    if (!a_code) {
+      res.status(400).json({ message: "Código de asistencia es requerido" });
+      return;
+    }
     const { description } = req.body;
     const JUSTIFICATE_PATH: string = <string>process.env.JUSTIFICATE;
     if (req.files) {
@@ -56,7 +66,7 @@ export const storeJustification = async (
     } else {
       await justificate(+a_code, description, null);
     }
-    return res.status(200).json({ message: "Tu justificación ha sido enviado" });
+    res.status(200).json({ message: "Tu justificación ha sido enviado" });
   } catch (error) {
     next(error);
   }
@@ -71,13 +81,14 @@ export const storeAttendance = async (
     const { entity_identifier, entity_type } = req.body;
     const _existsToday = await existsToday(entity_identifier, entity_type);
     if (_existsToday) {
-      return res.status(200).send({
+      res.status(200).json({
         message: "Su asistencia ya ha sido registrado",
         value: null
       });
+      return;
     }
     const value = await store(req.body);
-    return res.status(200).send({ message: "Correctamente Guardado", value });
+    res.status(200).json({ message: "Correctamente Guardado", value });
   } catch (error) {
     next(error);
   }
@@ -90,6 +101,10 @@ export const fetchAttendanceByEntity = async (
 ) => {
   try {
     const { entity_identifier } = req.params;
+    if (!entity_identifier) {
+      res.status(400).json({ message: "Código de entidad es requerido" });
+      return;
+    }
     const { from, to, priority } = req.query;
 
     const attendances = await fetchByEntity(
@@ -99,7 +114,7 @@ export const fetchAttendanceByEntity = async (
       Number(priority)
     );
 
-    return res.status(200).json({ values: attendances });
+    res.status(200).json({ values: attendances });
   } catch (error) {
     next(error);
   }
@@ -112,7 +127,7 @@ export const createInspection = async (
 ) => {
   try {
     await sendPermise(req.body);
-    return res.status(200).send({ message: "Correctamente enviado" });
+    res.status(200).json({ message: "Correctamente enviado" });
   } catch (error) {
     next(error);
   }
