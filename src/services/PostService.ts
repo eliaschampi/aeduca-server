@@ -100,28 +100,6 @@ class PostService {
   }
 
   /**
-   * Get posts created by a specific user
-   */
-  async getUserPosts(dni: string, limit = 20, offset = 0): Promise<PostModel[]> {
-    return await PostModel.query()
-      .where("creator_dni", dni)
-      .orderBy("created_at", "desc")
-      .limit(limit)
-      .offset(offset);
-  }
-
-  /**
-   * Get saved posts for a user
-   */
-  async getSavedPosts(dni: string, limit = 20, offset = 0): Promise<PostModel[]> {
-    return await PostModel.query()
-      .whereRaw("? = ANY(savelist)", [dni])
-      .orderBy("created_at", "desc")
-      .limit(limit)
-      .offset(offset);
-  }
-
-  /**
    * Update a post
    */
   async update(code: number, updateData: Partial<IPost>): Promise<PostModel> {

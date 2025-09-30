@@ -1,13 +1,6 @@
 import CommentModel, { IComment } from "../model/Comment";
 import PostModel from "../model/Post";
 
-type CommentFilters = {
-  post_code?: number;
-  from_dni?: string;
-  limit?: number;
-  offset?: number;
-};
-
 class CommentService {
   /**
    * Create a new comment
@@ -136,18 +129,6 @@ class CommentService {
   }
 
   /**
-   * Get comments by user
-   */
-  async getUserComments(dni: string, limit = 20, offset = 0): Promise<CommentModel[]> {
-    return await CommentModel.query()
-      .where("from_dni", dni)
-      .withGraphFetched("post")
-      .orderBy("created_at", "desc")
-      .limit(limit)
-      .offset(offset);
-  }
-
-  /**
    * Update a comment
    */
   async update(code: number, updateData: Partial<IComment>): Promise<CommentModel> {
@@ -166,31 +147,6 @@ class CommentService {
   async delete(code: number): Promise<number> {
     // This will cascade delete all replies due to foreign key constraint
     return await CommentModel.query().deleteById(code);
-  }
-
-  /**
-   * Get comments with filters
-   */
-  async getComments(filters: CommentFilters): Promise<CommentModel[]> {
-    let query = CommentModel.query().orderBy("created_at", "desc");
-
-    if (filters.post_code) {
-      query = query.where("post_code", filters.post_code);
-    }
-
-    if (filters.from_dni) {
-      query = query.where("from_dni", filters.from_dni);
-    }
-
-    if (filters.limit) {
-      query = query.limit(filters.limit);
-    }
-
-    if (filters.offset) {
-      query = query.offset(filters.offset);
-    }
-
-    return await query;
   }
 
   /**
@@ -214,28 +170,6 @@ class CommentService {
     };
 
     return await this.create(replyPayload);
-  }
-
-  /**
-   * Count comments by user in date range
-   */
-  async countUserComments(
-    dni: string,
-    startDate?: Date,
-    endDate?: Date
-  ): Promise<number> {
-    let query = CommentModel.query().where("from_dni", dni);
-
-    if (startDate) {
-      query = query.where("created_at", ">=", startDate);
-    }
-
-    if (endDate) {
-      query = query.where("created_at", "<=", endDate);
-    }
-
-    const result = await query.count("* as count").first();
-    return parseInt(String((result as any)?.count || "0"));
   }
 }
 

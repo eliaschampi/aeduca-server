@@ -191,18 +191,6 @@ export async function toggleCommentable({ code, dni }: PostToggleReactionInput) 
   return updated;
 }
 
-export async function getPostWithComments(code: number) {
-  const post = await PostService.getById(code);
-  if (!post) {
-    throw new Error("Post no encontrado");
-  }
-  const comments = await CommentService.getAllPostComments(code);
-  return {
-    post,
-    comments
-  };
-}
-
 function ensureComment(comment?: CommentModel | null): CommentModel {
   if (!comment) {
     throw new Error("Comentario no encontrado");
