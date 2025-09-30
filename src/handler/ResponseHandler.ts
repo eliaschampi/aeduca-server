@@ -32,8 +32,9 @@ export const fetchByRegister = async (
       return;
     }
     const value = await rh.fetchByRegister(+lesson_code, register_code);
-    if (value?.files) {
-      const files = await byCodeIn(value.files.map((file) => file.code));
+    if (value?.files?.length) {
+      const fileCodes = value.files.map((file) => (typeof file === "number" ? file : file.code));
+      const files = await byCodeIn(fileCodes);
       value.files = files;
     }
     res.status(200).json({ value });
