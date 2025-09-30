@@ -13,7 +13,7 @@ class FileCore {
   constructor() {
     // Default to '/drive' when STORAGE env variable is not provided
     this.storageRoot = process.env.STORAGE ?? "/drive";
-    this.ensureStorageRoot();
+    void this.ensureStorageRoot();
   }
 
   /**

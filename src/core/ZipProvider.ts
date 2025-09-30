@@ -75,7 +75,7 @@ export class ZipAFolder {
 
       zipArchive.pipe(output);
       zipArchive.directory(srcFolder, false);
-      zipArchive.finalize();
+      void zipArchive.finalize();
     });
   }
 }

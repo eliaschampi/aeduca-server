@@ -91,8 +91,8 @@ export function connection(io: IO): void {
       }
     });
 
-    socket.on("logout", async (dni: string | undefined, ack: Ack) => {
-      const identifier = dni || socket.data.dni;
+    socket.on("logout", (dni: string | undefined, ack: Ack) => {
+      const identifier = dni ?? socket.data.dni;
       if (identifier) {
         updateLastLogout(identifier);
       }

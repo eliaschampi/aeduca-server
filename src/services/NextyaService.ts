@@ -125,9 +125,9 @@ export class NextyaService {
     try {
       const result = await nextyaKnex.raw(
         "SELECT eval_code, eval_name, eval_date, course_code, course_name, score FROM get_student_course_evolution_by_course(?, ?)",
-        [studentCode, courseCode || null]
+        [studentCode, courseCode ?? null]
       );
-      return result.rows || [];
+      return result.rows ?? [];
     } catch {
       return [];
     }
