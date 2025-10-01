@@ -130,12 +130,11 @@ class CommentService {
 
   /**
    * Update a comment
+   * @param code - Comment code
+   * @param updateData - Partial comment data (only fields to update)
    */
   update(code: number, updateData: Partial<IComment>) {
-    return CommentModel.query().updateAndFetchById(code, {
-      message: updateData.message ?? "",
-      updated_at: new Date()
-    });
+    return CommentModel.query().patchAndFetchById(code, updateData);
   }
 
   delete(code: number) {

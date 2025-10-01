@@ -93,6 +93,10 @@ class CommentModel extends Model {
       }
     };
   }
+
+  $beforeUpdate() {
+    this.updated_at = new Date();
+  }
 }
 
 export default CommentModel;

@@ -154,6 +154,10 @@ class PostModel extends Model {
     }
     return this.savelist;
   }
+
+  $beforeUpdate() {
+    this.updated_at = new Date();
+  }
 }
 
 export type PostCreateInput = {

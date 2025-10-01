@@ -186,7 +186,11 @@ export async function updateComment({ dni, code, message }: CommentUpdateInput) 
     throw new Error("No autorizado para actualizar este comentario");
   }
 
-  const updated = await CommentService.update(code, { message });
+  const updateData: Partial<IComment> = {
+    message
+  };
+
+  const updated = await CommentService.update(code, updateData);
   emitCommentUpdated(updated);
   return updated;
 }

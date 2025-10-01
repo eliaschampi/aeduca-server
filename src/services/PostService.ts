@@ -98,7 +98,7 @@ class PostService {
    * Update a post
    */
   update(code: number, updateData: Partial<IPost>) {
-    return PostModel.query().updateAndFetchById(code, updateData);
+    return PostModel.query().patchAndFetchById(code, updateData);
   }
 
   /**
