@@ -5,6 +5,7 @@ import { NextFunction, Request, Response } from "express";
 import { UploadedFile } from "express-fileupload";
 import FileCore from "../core/FileCore";
 import { FileEntity, mimeTypes } from "../model/File";
+
 import {
   byCode,
   byUser,
@@ -300,6 +301,7 @@ export const storeFile = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    // Validate file presence
     if (!req.files?.file) {
       res.status(400).json({ message: "No se proporciono un archivo" });
       return;
@@ -311,6 +313,21 @@ export const storeFile = async (
     // Ensure user directory exists
     await FileCore.ensureUserDirectory(entityData.dni);
 
+    // ✅ CRITICAL: Validate storage quota BEFORE upload
+    const currentUsage = await FileCore.getUserStorageUsage(entityData.dni);
+    const STORAGE_LIMIT = 200 * 1024 * 1024; // 200MB
+
+    if (currentUsage + file.size > STORAGE_LIMIT) {
+      res.status(400).json({
+        message: "Límite de almacenamiento excedido",
+        current: currentUsage,
+        limit: STORAGE_LIMIT,
+        required: file.size,
+        available: STORAGE_LIMIT - currentUsage
+      });
+      return;
+    }
+
     // Determine file type based on extension
     const extension = path.extname(entityData.name).toLowerCase();
     const fileType = getFileType(extension);
@@ -320,7 +337,7 @@ export const storeFile = async (
     }
     entityData.type = fileType;
 
-    // Upload file
+    // Upload file to filesystem
     const uploadResult = await FileCore.uploadFile(file, entityData);
 
     if (!uploadResult.success) {
@@ -328,7 +345,7 @@ export const storeFile = async (
       return;
     }
 
-    // Store in database
+    // Store metadata in database
     const value = await store(uploadResult.entity!);
 
     res.status(201).json({

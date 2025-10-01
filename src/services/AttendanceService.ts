@@ -62,7 +62,12 @@ export function fetchByEntity(
   priority: number
 ) {
   return knex
-    .select("attendance.*", "justification.*")
+    .select(
+      "attendance.*",
+      "justification.attendance_code",
+      "justification.description",
+      "justification.attached"
+    )
     .from(ATTENDANCE_TABLE_NAME)
     .leftJoin("justification", "attendance.code", "justification.attendance_code")
     .whereBetween("attendance.created_at", [from, to])
